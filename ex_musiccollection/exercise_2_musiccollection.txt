@@ -1,0 +1,83 @@
+# MANUALLY IMPORT A CSV FILE TO A TABLE
+# DATA FOR THIS EXERCISE COMES FROM: https://corgis-edu.github.io/corgis/csv/music/
+
+# CREATE AND ACCESS NEW DATABASE
+createdb musiccollection -h localhost -U postgres
+psql musiccollection -h localhost -U postgres
+
+# CREATE MASTER TABLE FOR CSV INGEST
+CREATE TABLE music (
+    artist_familiarity DECIMAL,
+    artist_hotttnesss DECIMAL,
+    artist_id VARCHAR(256),
+    artist_latitude DECIMAL,
+    artist_location DECIMAL,
+    artist_longitude DECIMAL,
+    artist_name VARCHAR(256),
+    artist_similar DECIMAL,
+    artist_terms VARCHAR(256),
+    artist_terms_freq DECIMAL,
+    release_id INTEGER,
+    release_name INTEGER,
+    song_artist_mbtags DECIMAL,
+    song_artist_mbtags_count DECIMAL,
+    song_bars_confidence DECIMAL,
+    song_bars_start DECIMAL,
+    song_beats_confidence DECIMAL,
+    song_beats_start DECIMAL,
+    song_duration DECIMAL,
+    song_end_of_fade_in DECIMAL,
+    song_hotttnesss DECIMAL,
+    song_id VARCHAR(256),
+    song_key DECIMAL,
+    song_key_confidence DECIMAL,
+    song_loudness DECIMAL,
+    song_mode INTEGER,
+    song_mode_confidence DECIMAL,
+    song_start_of_fade_out DECIMAL,
+    song_tatums_confidence DECIMAL,
+    song_tatums_start DECIMAL,
+    song_tempo DECIMAL,
+    song_time_signature DECIMAL,
+    song_time_signature_confidence DECIMAL,
+    song_title INTEGER,
+    song_year INTEGER
+);
+
+# COPY CSV FILE INTO DOCKER CONTAINER
+sudo docker cp music.csv post-dev:/var/lib/postgresql/data/music.csv
+
+# IMPORT CSV INTO MUSIC TABLE
+COPY music FROM '/var/lib/postgresql/data/music.csv' DELIMITER ',' CSV HEADER;
+
+# SELECT ARTISTS BASED ON THEIR GENRE
+select artist_name from music where artist_terms like '%country%';
+...
+                   artist_name                   
+-------------------------------------------------
+ Blue Rodeo
+ Jimmy Wakely
+ Billie Jo Spears
+ Glen Campbell
+...
+
+# DISPLAY THE LOUDEST SONG IN DESCENDING ORDER FROM EACH DISTINCT ARTIST BASED ON LOUDNESS AND PARTIAL GENRE MATCH TO METAL
+select distinct artist_name, song_loudness from music where artist_terms like '%metal%' AND song_loudness < '-10.00' order by song_loudness asc limit 4;
+...
+                                             artist_name                                              | song_loudness 
+------------------------------------------------------------------------------------------------------+---------------
+ Nine Inch Nails                                                                                      |       -12.951
+ Emperor                                                                                              |       -11.051
+ Nine Inch Nails                                                                                      |       -16.968
+ Butterfly Temple                                                                                     |       -10.777
+ 40 Grit                                                                                              |       -22.752
+...
+
+# SELECT ARTISTS BASED ON PARTIAL NAME MATCHING INSIDE KNOWN GENRE
+select artist_name from music where artist_terms = 'gangster rap' AND artist_name like '%Notorious%';
+...
+     artist_name      
+----------------------
+ The Notorious B.I.G.
+(1 row)
+...
