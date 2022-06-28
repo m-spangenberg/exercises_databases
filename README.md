@@ -489,7 +489,11 @@ terminal output:
 (1 row)
 ```
 
-https://youtu.be/4cWkVbC2bNE?t=6411
+**Remember: Kaggle.com is an excellent resource for datasets.**
+
+## Excercise: Video Games
+
+https://youtu.be/4cWkVbC2bNE?t=6946
 
 
 ## NO-SQL

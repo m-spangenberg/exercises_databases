@@ -1,0 +1,53 @@
+# start docker container
+sudo docker start dev-postgres
+
+# get shell inside container
+sudo docker exec -it dev-postgres bash
+
+# create database inside container
+createdb videogames -U postgres
+
+# get postgres shell
+psql videogames -U postgres
+
+# create table
+create table games(
+    name text,
+    platform text, 
+    year int, 
+    genre text, 
+    publisher text, 
+    NAsales numeric, 
+    EUsales numeric, 
+    JPsales numeric, 
+    othersales numeric, 
+    globalsales numeric,
+    criticscore numeric,
+    criticcount numeric,
+    userscore numeric,
+    usercount numeric,
+    developer text,
+    rating text
+);
+
+# Copy data to docker container from host
+sudo docker cp videogames.csv dev-postgres:/var/lib/postgresql/data/videogames.csv
+
+# Do some housekeeping on the data in-situ by removing any repetitions of 'N/A' from the file as we already treat empty delimiters as null.
+cp /var/lib/postgresql/data/videogames.csv /var/lib/postgresql/data/videogames2.csv
+sed -i -e 's/N\/A//g' /var/lib/postgresql/data/videogames.csv
+
+# import data
+COPY games FROM '/var/lib/postgresql/data/videogames.csv' DELIMITER ',' NULL AS '' CSV HEADER;
+
+# By issuing `select * from games limit 4;`, we should get the following output: 
+       name        | platform | year |  genre   | publisher | nasales | eusales | jpsales | othersales | globalsales | criticscore | criticcount | userscore | usercount | developer | rating 
+-------------------+----------+------+----------+-----------+---------+---------+---------+------------+-------------+-------------+-------------+-----------+-----------+-----------+--------
+ Wii Sports        | Wii      | 2006 | Sports   | Nintendo  |   41.36 |   28.96 |    3.77 |       8.45 |       82.53 |          76 |          51 |         8 |       322 | Nintendo  | E
+ Super Mario Bros. | NES      | 1985 | Platform | Nintendo  |   29.08 |    3.58 |    6.81 |       0.77 |       40.24 |             |             |           |           |           | 
+ Mario Kart Wii    | Wii      | 2008 | Racing   | Nintendo  |   15.68 |   12.76 |    3.79 |       3.29 |       35.52 |          82 |          73 |       8.3 |       709 | Nintendo  | E
+ Wii Sports Resort | Wii      | 2009 | Sports   | Nintendo  |   15.61 |   10.93 |    3.28 |       2.95 |       32.77 |          80 |          73 |         8 |       192 | Nintendo  | E
+(4 rows)
+
+# Let's see what the most popular games in the world are of all time as measured by their global sales figures in millions.
+select name, globalsales from games where games.globalsales > 20 order by games.globalsales desc limit 10;
