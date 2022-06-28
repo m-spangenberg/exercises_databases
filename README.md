@@ -491,7 +491,7 @@ terminal output:
 
 **Remember: Kaggle.com is an excellent resource for datasets.**
 
-## Excercise: Video Games
+## Excercise: Video Gamesq
 
 https://youtu.be/4cWkVbC2bNE?t=6946
 
