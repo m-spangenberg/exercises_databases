@@ -143,60 +143,6 @@ ALTER TABLE Enrollment ADD FOREIGN KEY(Sid) REFERENCES Students(Sid);
 ALTER TABLE Enrollment ADD FOREIGN KEY(Cid) REFERENCES Courses(Cid);
 ```
 
-## Excercise: The Bookstore
-
-Let's create a database for a bookstore called Pageturners. The owner of the bookstore is used to keeping track of the books in his store with a spreadsheet. It's our job to migrate his spreadsheet to a database with an appropriate schema. Their requirements are as follows:
-
-* they have a collection of `books`, each with a `title` and a `unique id`
-* and a list of `writers`, each writer has a `unique name`
-* naturally `writers` are `authors` of various `books`
-
-Fortunately for us, Pageturners has sent us their spreadsheet to get started.
-
-| Id 	| Title                          	| Author          	                 |
-|------	|--------------------------------	|--------------------------------    |
-| 1    	| Life Of Pi                     	| Yann Martel     	                 |
-| 2    	| Whitethorn                     	| Bryce Courtenay 	                 |
-| 3    	| Meditations: A New Translation 	| Marcus Aurelius 	                 |
-| 4    	| The 48 Laws of Power           	| Robert Greene   	                 |
-| 5    	| The Art Of War                 	| Sun Tzu         	                 |
-| 6    	| Database Guru                 	| Jimmy Droptables, Jane Droptables  |
-| ...  	| ...                             	| ...            	                 |
-
-The schema for our `PageturnersDB` will look as follows: A Books table containing a book id, which will act as the table's Primary Key, and the title of the book. Writers table, which has the writer's name and a unique id for each writer, which will act as this tables Primary Key. And finally, a Authors table, which will contain two foreign keys, one being the book id from the Books table, and the writer id from the Writers table. With this schema, we are able to maintain a many-to-many relationship, meaning books can have multiple writers and writers can write multiple books. 
-
-**Remember: Foreign Keys do not need to be unique. Only Primary Keys must be unique.**
-
-| Books Table  	      | Authors Table  	         | Writers Table 	                |
-|--------------	      |----------------	         |---------------	                |
-| [bookid, booktitle] | [bookid, writers]        | [writerid, first_name, last_name]|
-| Pkey: bookid    	  | Fkey: bookid, writerid 	 | Pkey: writerid     	            |
-
-As I am using Docker, these are my steps for my first exercise.
-
-```bash
-# Create the database
-createdb pageturnersdb -h localhost -U postgres
-
-# if you made a mistake you can drop (delete) the db with
-dropdb pageturnersdb -h localhost -U postgres
-
-# Enter the database
-psql pageturnersdb -U postgres
-
-# create the books table with a bid as the primary key
-# the id integrity constraint is integer
-# and the title is a string no longer than 240 characters.
-create table books(bookid bigserial primary key, booktitle varchar(240));
-
-# create the writers table with wid as the primary key
-# and wname as a string no longer than 240 characters.
-create table writers(writerid bigserial primary key, first_name varchar(240), last_name varchar(240));
-
-# finally we create join or junction table that references the other two tables
-create table authors (bookid int references books(bookid), writerid int references writers(writerid));
-```
-
 ### Data Manipulation Language (DML)
 
 Commands which are responsible for allowing CRUD operations to take place in the database.
@@ -210,70 +156,6 @@ Commands which are responsible for allowing CRUD operations to take place in the
 
 We can insert `fully specified` or `partially specified` data into rows. Fully specified means we specify the value for each column in the table, hence we fully specify what we want to be inserted. Partially specified, means we only target a specific column or subset of columns, and the DBMS fill the remaining columns automatically with NULL unless there is an integrity constraint which does not allow for NULL.
 
-**Remember: It is possible ot load data into tables via files**
-
-```bash
-# finally we populate the tables with data
-insert into books (booktitle) VALUES ('Life of Pi');
-insert into books (booktitle) VALUES ('Whitethorn');
-insert into books (booktitle) VALUES ('Meditations: A New Translation');
-insert into books (booktitle) VALUES ('The 48 Laws of Power');
-insert into books (booktitle) VALUES ('The Art Of War');
-insert into books (booktitle) VALUES ('Database Guru');
-
-# performing `select * from books;` will show you the inserted fields
- bookid |           booktitle            
---------+--------------------------------
-      1 | Life of Pi
-      2 | Whitethorn
-      3 | Meditations: A New Translation
-      4 | The 48 Laws of Power
-      5 | The Art Of War
-      6 | Database Guru
-(6 rows)
-
-# now let's insert some writers into the writers table
-insert into writers (first_name, last_name) VALUES ('Yann', 'Martel');
-insert into writers (first_name, last_name) VALUES ('Bryce', 'Courtenay');
-insert into writers (first_name, last_name) VALUES ('Marcus', 'Aurelius');
-insert into writers (first_name, last_name) VALUES ('Robert', 'Greene');
-insert into writers (first_name, last_name) VALUES ('Sun', 'Tzu');
-
-# `select * from writers;` should show the following:
- writerid | first_name | last_name 
-----------+------------+-----------
-        1 | Bryce      | Courtenay
-        2 | Marcus     | Aurelius
-        3 | Robert     | Greene
-        4 | Sun        | Tzu
-        5 | Yann       | Martel
-(5 rows)
-
-# we forgot to add two writers
-insert into writers (first_name, last_name) VALUES ('Jimmy', 'Droptables');
-insert into writers (first_name, last_name) VALUES ('Jane', 'Droptables');
-
-# now let's connect books to writers
-insert into authors (bookid, writerid) VALUES (2, 1);
-insert into authors (bookid, writerid) VALUES (3, 2);
-insert into authors (bookid, writerid) VALUES (4, 3);
-insert into authors (bookid, writerid) VALUES (5, 4);
-insert into authors (bookid, writerid) VALUES (6, 6);
-insert into authors (bookid, writerid) VALUES (6, 7);
-insert into authors (bookid, writerid) VALUES (1, 5);
-
-# finally, if we try `select * from authors;`:
- bookid | writerid 
---------+----------
-      2 |        1
-      3 |        2
-      4 |        3
-      5 |        4
-      6 |        6
-      6 |        7
-      1 |        5
-(7 rows)
-```
 #### Deleting Data
 
 Deleting data from tables can be achieved with `DELETE FROM <table> WHERE <condition>`. For instance, Pageturners has been told Jimmy Droptables wasn't an author on Database Guru.
@@ -365,120 +247,19 @@ A predicate is not a conditional. A conditional statement allows for branching l
 * Count distinct values in column: `COUNT(DISTINCT <col>)`
 * Aggregating multiple columns: `GROUP BY <col-list>`
 
+example: let's count the the remaining rows with `COUNT(*)`
+```sql
+SELECT COUNT(*)
+FROM books
+    JOIN Authors ON (books.bookid = authors.bookid)
+    JOIN Writers ON (authors.writerid = writers.writerid)
+WHERE books.booktitle = 'Life of Pi';
+```
+
 #### Group Predicates
 
 * `WHERE` applies to a single row
 * `HAVING` specifies grouped data
-
-
-
-**Remember: Kaggle.com is an excellent resource for datasets.**
-
-## Excercise: Video Games
-
-I'll start by setting up the PSQL database in my docker container.
-
-```bash
-# start docker container
-sudo docker start dev-postgres
-
-# get shell inside container
-sudo docker exec -it dev-postgres bash
-
-# create database inside container
-createdb videogames -U postgres
-
-# get postgres shell
-psql videogames -U postgres
-
-# create table
-create table games(
-    name text,
-    platform text, 
-    year int, 
-    genre text, 
-    publisher text, 
-    NAsales numeric, 
-    EUsales numeric, 
-    JPsales numeric, 
-    othersales numeric, 
-    globalsales numeric,
-    criticscore numeric,
-    criticcount numeric,
-    userscore numeric,
-    usercount numeric,
-    developer text,
-    rating text
-);
-
-# Copy data to docker container from host
-sudo docker cp videogames.csv dev-postgres:/var/lib/postgresql/data/videogames.csv
-
-# Do some housekeeping on the data in-situ by removing any repetitions of 'N/A' from the file as we already treat empty delimiters as null.
-cp /var/lib/postgresql/data/videogames.csv /var/lib/postgresql/data/videogames2.csv
-sed -i -e 's/N\/A//g' /var/lib/postgresql/data/videogames.csv
-
-# I'll then import the CSV with the COPY command.
-COPY games FROM '/var/lib/postgresql/data/videogames.csv' DELIMITER ',' NULL AS '' CSV HEADER;
-```
-
-Now we can attempt some analysis of the dataset with some of our newfound query language skills.
-
-```bash
-# By issuing `select * from games limit 4;`, we should get the following output:
-
-       name        | platform | year |  genre   | publisher | nasales | eusales | jpsales | othersales | globalsales | criticscore | criticcount | userscore | usercount | developer | rating 
--------------------+----------+------+----------+-----------+---------+---------+---------+------------+-------------+-------------+-------------+-----------+-----------+-----------+--------
- Wii Sports        | Wii      | 2006 | Sports   | Nintendo  |   41.36 |   28.96 |    3.77 |       8.45 |       82.53 |          76 |          51 |         8 |       322 | Nintendo  | E
- Super Mario Bros. | NES      | 1985 | Platform | Nintendo  |   29.08 |    3.58 |    6.81 |       0.77 |       40.24 |             |             |           |           |           | 
- Mario Kart Wii    | Wii      | 2008 | Racing   | Nintendo  |   15.68 |   12.76 |    3.79 |       3.29 |       35.52 |          82 |          73 |       8.3 |       709 | Nintendo  | E
- Wii Sports Resort | Wii      | 2009 | Sports   | Nintendo  |   15.61 |   10.93 |    3.28 |       2.95 |       32.77 |          80 |          73 |         8 |       192 | Nintendo  | E
-(4 rows)
-
-# Let's see what the 3 most popular games in the world are of all time as measured by their global sales figures in millions.
-select name, globalsales from games where games.globalsales > 20 order by games.globalsales desc limit 3;
-
-       name        | globalsales 
--------------------+-------------
- Wii Sports        |       82.53
- Super Mario Bros. |       40.24
- Mario Kart Wii    |       35.52
-(3 rows)
-
-# Let's try to group total sales for all video games by their genre.
-select sum(globalsales), genre from games group by genre;
-
-   sum   |    genre     
----------+--------------
-  237.69 | Adventure
-  243.02 | Puzzle
-  174.50 | Strategy
-  934.40 | Role-Playing
-  390.42 | Simulation
-  803.18 | Misc
-    2.42 | 
-  447.48 | Fighting
-  728.90 | Racing
- 1332.00 | Sports
- 1745.27 | Action
- 1052.94 | Shooter
-  828.08 | Platform
-(13 rows)
-
-# Let's try to see what the top 5 most popular video games platforms of all time are by number of games sold.
-select sum(globalsales) as totalsales, platform from games group by platform order by totalsales desc limit 5;
-
-# Note: I've aliased sum(globalsales) to totalsales
-
- totalsales | platform 
-------------+----------
-    1255.64 | PS2
-     971.63 | X360
-     939.43 | PS3
-     908.13 | Wii
-     807.10 | DS
-(5 rows)
-```
 
 #### Ordering Syntax
 
