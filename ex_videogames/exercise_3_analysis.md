@@ -1,3 +1,14 @@
+## Excercise: Video Games
+
+* Download a dataset
+* Ingest the dataset
+* Analyze the dataset
+
+**Remember: Kaggle.com is an excellent resource for datasets.**
+
+I'll start by setting up the PSQL database in my docker container.
+
+```bash
 # start docker container
 sudo docker start dev-postgres
 
@@ -37,9 +48,13 @@ sudo docker cp videogames.csv dev-postgres:/var/lib/postgresql/data/videogames.c
 cp /var/lib/postgresql/data/videogames.csv /var/lib/postgresql/data/videogames2.csv
 sed -i -e 's/N\/A//g' /var/lib/postgresql/data/videogames.csv
 
-# import data
+# I'll then import the CSV with the COPY command.
 COPY games FROM '/var/lib/postgresql/data/videogames.csv' DELIMITER ',' NULL AS '' CSV HEADER;
+```
 
+Now we can attempt some analysis of the dataset with some of our newfound query language skills.
+
+```bash
 # By issuing `select * from games limit 4;`, we should get the following output:
 
        name        | platform | year |  genre   | publisher | nasales | eusales | jpsales | othersales | globalsales | criticscore | criticcount | userscore | usercount | developer | rating 
@@ -93,3 +108,4 @@ select sum(globalsales) as totalsales, platform from games group by platform ord
      908.13 | Wii
      807.10 | DS
 (5 rows)
+```

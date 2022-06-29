@@ -1,12 +1,21 @@
-# MANUALLY IMPORT A CSV FILE TO A TABLE
-# DATA FOR THIS EXERCISE COMES FROM: https://corgis-edu.github.io/corgis/csv/music/
+## Excercise: Music Collection
 
-# CREATE AND ACCESS NEW DATABASE
+* Download a public dataset of your choice
+* Load it into the database
+* Try to find interesting relations within the data
+
+Manually import a csv file to a table
+data for this exercise comes from: https://corgis-edu.github.io/corgis/csv/music/
+
+Create and access new database
+```bash
 createdb musiccollection -h localhost -U postgres
 psql musiccollection -h localhost -U postgres
+```
 
-# CREATE MASTER TABLE FOR CSV INGEST
-CREATE TABLE music (
+create master table for csv ingest
+```sql
+create table music (
     artist_familiarity DECIMAL,
     artist_hotttnesss DECIMAL,
     artist_id VARCHAR(256),
@@ -43,16 +52,24 @@ CREATE TABLE music (
     song_title INTEGER,
     song_year INTEGER
 );
+```
 
-# COPY CSV FILE INTO DOCKER CONTAINER
+Copy CSV file into docker container
+```bash
 sudo docker cp music.csv post-dev:/var/lib/postgresql/data/music.csv
+```
 
-# IMPORT CSV INTO MUSIC TABLE
-COPY music FROM '/var/lib/postgresql/data/music.csv' DELIMITER ',' CSV HEADER;
+Import csv into music table
+```sql
+copy music from '/var/lib/postgresql/data/music.csv' delimiter ',' csv header;
+```
 
-# SELECT ARTISTS BASED ON THEIR GENRE
+Select artists based on a genre: I choose country music
+```sql
 select artist_name from music where artist_terms like '%country%';
-...
+```
+terminal output:
+```bash
                    artist_name                   
 -------------------------------------------------
  Blue Rodeo
@@ -60,24 +77,33 @@ select artist_name from music where artist_terms like '%country%';
  Billie Jo Spears
  Glen Campbell
 ...
+```
 
-# DISPLAY THE LOUDEST SONG IN DESCENDING ORDER FROM EACH DISTINCT ARTIST BASED ON LOUDNESS AND PARTIAL GENRE MATCH TO METAL
+Display the loudest songs in the database in descending order from each artist based on the loudness of the song and a partial genre the metal genre, each artist must be distinct. It's worth noting loudness here is represented in Decibels so negative numbers are louder.
+
+```sql
 select distinct artist_name, song_loudness from music where artist_terms like '%metal%' AND song_loudness < '-10.00' order by song_loudness asc limit 4;
-...
-                                             artist_name                                              | song_loudness 
-------------------------------------------------------------------------------------------------------+---------------
- Nine Inch Nails                                                                                      |       -12.951
- Emperor                                                                                              |       -11.051
- Nine Inch Nails                                                                                      |       -16.968
- Butterfly Temple                                                                                     |       -10.777
- 40 Grit                                                                                              |       -22.752
-...
+```
+terminal output:
+```bash
+ artist_name | song_loudness 
+-------------+---------------
+ Hinge       |       -32.987
+ Don Davis   |        -27.24
+ Tony Martin |       -26.928
+ Rainbow     |        -23.44
+(4 rows)
+```
 
-# SELECT ARTISTS BASED ON PARTIAL NAME MATCHING INSIDE KNOWN GENRE
+Select artists based on partial name matching inside known genre
+```sql
 select artist_name from music where artist_terms = 'gangster rap' AND artist_name like '%Notorious%';
-...
+```
+
+terminal output:
+```bash
      artist_name      
 ----------------------
  The Notorious B.I.G.
 (1 row)
-...
+```
