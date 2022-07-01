@@ -310,14 +310,22 @@ All of the above **Set Operations** must be `union-compatible`, in other words t
 With nesting we can use queries as part of other queries, for example we can say `FROM <query>` replacing the table, and as part of a condition in a `WHERE` clause, `WHERE <query>`. The smaller queries inside the larger query are called `sub-queries`. Formally, in th context of this relationshop, a query is referred to as a containing query and a sub-query is referred to as a contained query. Sub-queries that can run independently, in other words that are not dependant on their containing query to produce a result (self-contained), are called Uncorrelated sub-queries. Correlated sub-queries can reference their containing queries.
 
 **Uncorrelated examples**: Inner queries can run independently from their containing queries.
+
 ```sql
 SELECT subquery.studentname FROM(SELECT studentname FROM studentstable) AS subquery;
 SELECT studentname FROM studentstable WHERE gpa >= (SELECT MAX(gpa) FROM studentstable);
 ```
 
 **Correlated example**: Inner queries are dependant on their containing queries.
+
 ```sql
 SELECT s1.studentname FROM studentstable s1 WHERE s1.gpa >= ALL(SELECT s2.gpa FROM studentstable s2 WHERE s1.studentname = s2.studentname)
+```
+
+**Multiple nested queries example**: Queries nested in queries nested in queries.
+
+```sql
+SELECT course.coursename FROM coursestable course WHERE NOT EXISTS (SELECT * FROM studentstable student WHERE NOT EXISTS( SELECT * FROM enrollmenttable enrolled WHERE enrolled.courseid = course.courseid AND enrolled.studentid = student.studentid))
 ```
 
 #### Sub-Queries in Conditionals
