@@ -10,10 +10,10 @@ I'll start by setting up the PSQL database in my docker container.
 
 ```bash
 # start docker container
-sudo docker start dev-postgres
+sudo docker start post-dev
 
 # get shell inside container
-sudo docker exec -it dev-postgres bash
+sudo docker exec -it post-dev bash
 
 # create database inside container
 createdb videogames -U postgres
