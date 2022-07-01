@@ -1,3 +1,7 @@
-postgresql/psql-data/
+# Ignore all folders called data inside the project structure
+*/data/
+
+# Ignore files of format
 *.csv
 *.zip
+*.db
