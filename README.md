@@ -2,41 +2,6 @@
 
 Below are my study notes on databases. I've made these notes to further my understanding of the inner-workings of databases and database management systems.
 
-## Quick Setup: Testing Environment
-
-First I'm going to set up an environment where I can work with a popular RDBMS. I would like to have both command-line and GUI access, so for my purposes I have chosen PostgreSQL as the RDBMS and pgAdmin as the administration panel. If you are new to databases, get your feet wet with SQLite instead of Postgres.
-
-### PostgreSQL in Docker
-
-```bash
-# make a working directory
-mkdir postgresql
- 
-# make a data directory
-cd postgresql
-mkdir psql-data
- 
-# get the postgres image amd the admin panel
-sudo docker pull postgres
-sudo docker pull dpage/pgadmin4
- 
-# create a docker container for postgresql and the admin panel
-sudo docker run --name post-dev -e 'POSTGRES_PASSWORD=YOURPASSWORD' -v ${HOME}/path/to/folder/psql-data:/var/lib/postgresql/data -p 5551:5551 -d postgres
-    
-sudo docker run --name post-admin -p 80:80 -e 'PGADMIN_DEFAULT_EMAIL=YOUREMAIL' -e 'PGADMIN_DEFAULT_PASSWORD=YOURPASSWORD' -d dpage/pgadmin4
- 
-# you can enter the postgresql container
-sudo docker exec -it post-dev bash
-# and get a shell for postgres
-psql -h localhost -U postgres
-# See: https://www.postgresql.org/docs/current/tutorial.html 
-
-# or connect to it with the admin panel, just grab the postgresql containers IP first.
-sudo docker inspect post-dev {{ .NetworkSettings.Networks.$network.IPAddress }}
-# It should be something like: 172.17.0.2
-# go to 127.0.0.1:80 to connect to the admin panel and add the server
-```
-
 ## Introduction To Database Systems
 
 ### Database Management Systems (DBMS)
