@@ -379,7 +379,7 @@ So far we have been looking at **row-store architecture**, which assumes data wh
 
 ## Tree Indexes
 
-Within the architecture of Database Management Systems, a major concern is being able to store and retrieve data in the most efficient way possible.
+Within the architecture of Database Management Systems, a major concern is being able to store and retrieve data in the most efficient way possible. There are essentially two branches or types of indexing, one organized as **search trees**, and the other as **hash indexes**.
 
 ### Quickly Finding Data
 
@@ -394,6 +394,20 @@ The way we can solve the above problem is to use an index. An **index** is an au
 Indexes store **references** to data records, this means they store **page** IDs and **slot** IDs. These indexes can **group records** by values in specific columns. These columns are called the **index search key** and retrieves records for specific **search key values**
 
 Example: Index by Student Name
+
+| page 14       | page 15        | page 16        | page 17         | page 18       |
+|---------------|----------------|----------------|-----------------|---------------|
+| [Alan][P22,3] | [Felix][P77,3] | [Chen][P15,1]  | [Mia][P25,1]    | [Jose][P44,3] |
+| [Bob][P42,1]  | [John][P31,1]  | [Frank][P28,3] | [Sergei][P27,3] | [Rosa][P11,1] |
+| [Alec][P69,1] | [Harry][P21,3] | [Ida][P53,3]   | [Victor][P58,1] | [Gert][P45,3] |
+
+In the above example we have multiple **Index Pages IDs** which have student ID (**index search keys**) related to **Data Page IDs and Slot IDs**. This index can be searched using a binary tree algorithm. It is important to remember that in the context of database management systems, the cost of accessing data dominates processing costs, that is why index structures are optimized for minimizing the number of pages needed to load from disk in order to find the data being searched for. Even though binary search narrows our search space by a **factor of two**, it is possible to improve upon this **pruning factor** even further by using non-binary search trees (**tree indexes**).
+
+### Index Node Content
+
+Formally we can describe the structure of a an index tree as follows: The contents of **inner nodes** alternate between references to index pages and search keys `(R(0), K(1), R(1), K(2) ...)` where `R(i)` strictly leads to entries ordered before `K(i+1)`. `R(i)` in turn references an **index page**. The content of **leaf nodes** 
+
+https://youtu.be/4cWkVbC2bNE?t=14903
 
 
 ## Hash Indexes
