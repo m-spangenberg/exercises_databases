@@ -1,6 +1,6 @@
 # Databases
 
-Below are my study notes on databases. I've made these notes to further my understanding of the inner-workings of databases and database management systems.
+Below are my study notes on a lecture about Database Systems by Prof. Trummer. I've made these notes to further my understanding of the inner-workings of databases and database management systems.
 
 ## Introduction To Database Systems
 
@@ -272,7 +272,7 @@ All of the above **Set Operations** must be `union-compatible`, in other words t
 
 #### Query Nesting
 
-With nesting we can use queries as part of other queries, for example we can say `FROM <query>` replacing the table, and as part of a condition in a `WHERE` clause, `WHERE <query>`. The smaller queries inside the larger query are called `sub-queries`. Formally, in th context of this relationshop, a query is referred to as a containing query and a sub-query is referred to as a contained query. Sub-queries that can run independently, in other words that are not dependant on their containing query to produce a result (self-contained), are called Uncorrelated sub-queries. Correlated sub-queries can reference their containing queries.
+With nesting we can use queries as part of other queries, for example we can say `FROM <query>` replacing the table, and as part of a condition in a `WHERE` clause, `WHERE <query>`. The smaller queries inside the larger query are called `sub-queries`. Formally, in the context of this relationship, a query is referred to as a containing query and a sub-query is referred to as a contained query. Sub-queries that can run independently, in other words that are not dependant on their containing query to produce a result (self-contained), are called Uncorrelated sub-queries. Correlated sub-queries can reference their containing queries.
 
 **Uncorrelated examples**: Inner queries can run independently from their containing queries.
 
@@ -347,20 +347,35 @@ Databases management system design is influenced by the memory hierarchy. Capaci
 
 When designing databases, we ideally want to optimize our system to minimize data movement, this can be achieved by reading data in larger chunks (pages) and keep related data closer together to make the access more efficient. Another consideration is volatility and the ability to recover from failure in the memory hierarchy.
 
-### Data Storage Formats
+## Data Storage Formats
 
-#### Tables as Files
+### Tables as Files
 
 We can store the information or meta-data for the **Table Schema** in a **database catalogue**, the content of **tables** are then stored as a **collection of pages (files)**, with each page storing a few KB of data. They can store multiple rows but not entire tables. The size of these pages are chosen to maximize retrieval efficiency in relation to the storage medium.
 
-|       |[metadata]|[metadata]|[metadata]|[metadata]| db catalogue |
-|-------|----------|----------|----------|----------|--------------|
-| page  | [chunks] | [chunks] | [chunks] | [chunks] |              |
-| page  | [chunks] | [chunks] | [chunks] | [chunks] |              |
+### From Files to Pages
 
-#### From Files to Pages
+How do we keep track of which pages store information for which tables? One possibility is to use **doubly linked lists** where each page contains pointers to next and prior pages, optionally we can have pages that are full and pages that are empty so we do not waste time trying to write to full pages. Another possibility is to create a **directory** of pointers to pages, where the directory header page makes reference to directory pages, which in turn reference data pages with meta-data.
 
-https://youtu.be/4cWkVbC2bNE?t=12580
+### From Pages to Slots
+
+We need to be able to partition pages into sections that store different rows. To achieve this pages are divided into **slots**, and each slot stores one **record** (table row). Top refer to one specific row, we just need the pageID and slotID which both together become the recordID. There are multiple ways to device pages into slots dictated by the fixed-length vs variable length of records.
+
+### Fixed-Length Records
+
+Data types like integers can be determined **a-priori** due to the fixed quantity of bytes (4) needed to create one unit of said datatype. This means it is much easier to work with fixed-length data types, which can be uniformly partitioned into set sized records, as opposed to text strings, which are variable, and therefore not determinable a-priori. We must still keep track of how these slots are used (**insertions**), this is achieved with **packed representation**, or **unpacked representation**. Packed representation uses consecutive slots and only keeps track of number of slots used, whereas the unpacked method allows unused slots in-between used slots, but needs a bitmap to keep track of used slots. A potential issue with packed representation is that removing a slot (**deletion**) leaves a hole, which has to be filled, which effects the slotID meaning we would have to update any external references.
+
+### Variable-Length Records
+
+If we have data types that require a variable number of bytes in order to store an entry, the task of creating records becomes slightly more difficult. We can create a what is called an on-page directory concerned with used slots which stores a reference to the first byte and the length of slots. This allows us some flexibility to move around records on a page with the only update needing to be done with the on-page directory, this does not destroy external references.
+
+### From Slots to Fields
+
+We must take this process of decomposition even further, because one record typically stores data from multiple columns, so we must think about how we can divide each slot into **fields**. We face all the same challenges introduced by fixed vs variable data types. For fixed length data types, we store field sizes in the database **catalogue**, and for variable length data types, we store field sizes on a **page** in one of the following ways. We can either use special **delimiters symbols** between fields, or store a **field directory** at the beginning of the record.
+
+### Row Stores vs, Column Stores
+
+
 
 ## Tree Indexes
 
@@ -413,5 +428,5 @@ A non-exhaustive list of popular databases being used in professional environmen
 * MS-SQL - a relational database management system developed by Microsoft
 * MySQL - an open-source relational database management system
 * Apache Cassandra - an open-source, distributed, wide-column store, NoSQL database management system
-* Elasticsearch - a distributed, multitenant-capable full-text search engine
+* Elasticsearch - a distributed, multi tenant-capable full-text search engine
 * Neo4j - ACID-compliant transactional database with native graph storage and processing
