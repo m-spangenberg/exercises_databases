@@ -1,6 +1,6 @@
 # Databases
 
-Below are my study notes on a lecture about Database Systems by Prof. Trummer. I've made these notes to further my understanding of the inner-workings of databases and database management systems.
+Below are my study notes on a lecture about Database Systems by Prof. Trummer. I've made these notes to further my understanding of the inner-workings of databases and database management systems. A companion book for this lecture is: Database Management Systems by Johannes Gehrke and Raghu Ramakrishnan.
 
 ## Introduction To Database Systems
 
@@ -363,7 +363,7 @@ We need to be able to partition pages into sections that store different rows. T
 
 ### Fixed-Length Records
 
-Data types like integers can be determined **a-priori** due to the fixed quantity of bytes (4) needed to create one unit of said datatype. This means it is much easier to work with fixed-length data types, which can be uniformly partitioned into set sized records, as opposed to text strings, which are variable, and therefore not determinable a-priori. We must still keep track of how these slots are used (**insertions**), this is achieved with **packed representation**, or **unpacked representation**. Packed representation uses consecutive slots and only keeps track of number of slots used, whereas the unpacked method allows unused slots in-between used slots, but needs a bitmap to keep track of used slots. A potential issue with packed representation is that removing a slot (**deletion**) leaves a hole, which has to be filled, which effects the slotID meaning we would have to update any external references.
+Data types like integers can be determined **a-priori** due to the fixed quantity of bytes (4) needed to create one unit of said datatype. This means it is much easier to work with fixed-length data types, which can be uniformly partitioned into set sized records, as opposed to text strings, which are variable, and therefore not determinable a-priori. We must still keep track of how these slots are used (**insertions**), this is achieved with **packed representation**, or **unpacked representation**. Packed representation uses consecutive slots and only keeps track of number of slots used, whereas the unpacked method allows unused slots in-between used slots, but needs a bitmap to keep track of used slots. A potential issue with packed representation is that removing a slot (**deletion**) leaves a hole, which has to be filled, which effects the slotID, meaning we would have to update any external references.
 
 ### Variable-Length Records
 
@@ -375,9 +375,26 @@ We must take this process of decomposition even further, because one record typi
 
 ### Row Stores vs, Column Stores
 
-
+So far we have been looking at **row-store architecture**, which assumes data which belongs to the same row is stored close together. This is how traditional databases like Postgres function. There is another breed of database system that use **column-store architecture** which attempt to store data for the same column close together which is optimized for queries that only access a few related columns.
 
 ## Tree Indexes
+
+Within the architecture of Database Management Systems, a major concern is being able to store and retrieve data in the most efficient way possible.
+
+### Quickly Finding Data
+
+Let's say we have an enrollment table that contains information about students and the courses they are taking. If we stored the data for this table in an **unordered** way, it would mean we would have to scan the entire unordered collection of pages to find a single entry. A better approach would be to sort the data by student ID and apply a **binary** search. The problem with this approach is we are limited to one sort order, meaning have to choose one specific way to order the data. If our requirements change, like we want to search courses not student IDs.
+****
+### Indexes
+
+The way we can solve the above problem is to use an index. An **index** is an auxillary data structure for finding data faster, exactly like the index in a book. We can have multiple indexes for the same table, one can be for info on specific students, and another for specific courses.
+
+### How It Works
+
+Indexes store **references** to data records, this means they store **page** IDs and **slot** IDs. These indexes can **group records** by values in specific columns. These columns are called the **index search key** and retrieves records for specific **search key values**
+
+Example: Index by Student Name
+
 
 ## Hash Indexes
 
