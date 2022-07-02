@@ -305,6 +305,63 @@ SELECT studentname FROM studentstable WHERE gpa >= (SELECT gpa FROM studentstabl
 
 ## Data Storage
 
+### Data Storage Hardware
+
+The **Memory Hierarchy** in Computer Science, refers to the relation between **access speed** and **storage capacity**. Usually, the higher the speed, the lower the capacity, and so this creates a triangle with very fast memory inside the CPU called **registers** at the top of the pyramid and slower magnetic **tape backups** at the bottom. It is also important to remember that storage is either `volatile` or `non-volatile`, meaning data will either disappear once power is cycled, or persist in a stable way between states. Data must move through this hierarchy up towards the processor, so the processor can access the stored information.
+
+* Registers -- Volatile
+  * Fastest Access
+  * Smallest Capacity
+  * Highest Cost
+  * Limited Function
+* CPU Cache -- Volatile
+  * L1 (fastest), L2 (faster), L3 (fast) Caches
+  * Near Instantaneous Access (~1 Nanosecond)
+  * Very High Bandwidth (Hundreds to Thousands of GB/s)
+  * Very Low Capacity (Tens of Kilobytes)
+  * Very Expensive (Hundreds of $/GB)
+* Main Memory -- Volatile
+  * Very Fast Access (~Tens of Nanoseconds)
+  * Low Capacity (Tens to Hundreds of Gigabytes)
+  * High Bandwidth (~GB/s)
+  * Expensive (Many $/GB)
+* Flash Memory -- Non-Volatile
+  * Fast Access (~1 Millisecond)
+  * High Capacity (Tens to Hundreds of Terabytes)
+  * Elevated Read Speed (500MB/s)
+  * Less Cheap ($0.25/GB)
+* Hard Disks -- Non-Volatile
+  * Slow Access (10s of Milliseconds)
+  * Moderate Capacity (Tens of Terabytes)
+  * Moderate Read Speed (~200MB/s)
+  * Cheap ($0.035/GB)
+* Tape Backups -- Non-Volatile
+  * Slow Access (10s of Seconds)
+  * Highest Capacity (Hundreds of Terabytes)
+  * Moderate Read Speed (~300MB/s)
+  * Very Cheap ($0.02/GB)
+
+### Relevance for DBMS
+
+Databases management system design is influenced by the memory hierarchy. Capacity limits force data down the hierarchy and access speed, which becomes a bottleneck the lower we go down the hierarchy, is influenced by how the databases algorithms were created. Random access to data is 'expensive', in Computer Science terms this costliness is described with mathematical notation referred to as [big-O notation](https://en.wikipedia.org/wiki/Big_O_notation), which describes "limiting behavior of a function when the argument tends towards a particular value".
+
+When designing databases, we ideally want to optimize our system to minimize data movement, this can be achieved by reading data in larger chunks (pages) and keep related data closer together to make the access more efficient. Another consideration is volatility and the ability to recover from failure in the memory hierarchy.
+
+### Data Storage Formats
+
+#### Tables as Files
+
+We can store the information or meta-data for the **Table Schema** in a **database catalogue**, the content of **tables** are then stored as a **collection of pages (files)**, with each page storing a few KB of data. They can store multiple rows but not entire tables. The size of these pages are chosen to maximize retrieval efficiency in relation to the storage medium.
+
+|       |[metadata]|[metadata]|[metadata]|[metadata]| db catalogue |
+|-------|----------|----------|----------|----------|--------------|
+| page  | [chunks] | [chunks] | [chunks] | [chunks] |              |
+| page  | [chunks] | [chunks] | [chunks] | [chunks] |              |
+
+#### From Files to Pages
+
+https://youtu.be/4cWkVbC2bNE?t=12580
+
 ## Tree Indexes
 
 ## Hash Indexes
