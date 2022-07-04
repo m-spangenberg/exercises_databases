@@ -417,6 +417,8 @@ When searching for entries with, for instance **key value** `V`, we start at **r
 
 Often we want to retrieve entries from **neighbouring** leaf nodes, in this case it would be good for performance if these leaf nodes are linked in some way where we can get node references from **parent nodes**. In this case we can **store pointers** to next and previous neighbours in the leaf page, these leaf pages essentially become **doubly linked lists**.
 
+https://youtu.be/4cWkVbC2bNE?t=15496
+
 ## Hash Indexes
 
 ## Query Processing Overview
@@ -445,7 +447,45 @@ Often we want to retrieve entries from **neighbouring** leaf nodes, in this case
 
 ## Database Design
 
-## Database Normalization
+When designing databases in industry there are typical problems that need to be considered in order to create a database. At a high level, these processes can be described as follows:
+
+* **Requirement Analysis**
+  
+  Where we get more information about use cases and have to consider business processes as described by a company or client.
+
+* **Conceptual Design**
+
+  Here we must model how our data will be stored in our database. As we might have to relate this conceptual schema to non-technical or business people, it is useful to display this data in a more intuitive way with **Entity Relationship diagrams**. This high level abstraction of relationship model as diagrams has its own visual syntax.
+
+* **Schema Normalization**
+
+  Initial designs might be sub-optimal and it is easy to introduce redundancy in our database design. Our goal during schema normalization is to get rid of redundancy in order to arrive at a better schema. 
+
+* **Physical Tuning**
+
+  Here we decide on everything that effects performance, but has no effect on semantics. In practice, we would decide about which indexes to create, which sort orders to use, and so on.
+
+## Conceptual Design (ER Diagrams)
+
+### Entities and Attributes
+
+An entity is a generic term for one thing of a type of many. In other words, a single person/object in a group of people/objects, can be an entity. When working with **Entity Relationship diagrams**, we speak of **Entity Sets**, which equates to multiple entities of the same type that are grouped together. In our diagram, these **Entity Sets** are represented as rectangles. These entities generally have **Attributes** which are properties represented as ovals in the ER diagram. We then connect entities to attributes with lines in order to show association. Often, we have one or multiple attributes which together uniquely identify a specific entity, which are like keys and we underline all of these attributes which are part of a key attribute. The values are restricted, they usually are simple types like integers.
+
+### Relationships
+
+A relationship connects entities, which we represent with diamonds in the ER diagram and may connect two or more entities together. For instance, in a **Binary Relationship** example we might have an **Entity of type Lecturer** connected via a **Relationship of Teaches** to an **Entity of type Course**, or in a **Ternary Relationship** example we might see an **Entity of type Lecturer** connected to an **Entity of type Course** and an **Entity of type Room** via a **Relationship of type Teaches**. Naturally, the ternary relationship is more fine-grained and able to more clearly express relational information than a binary relationship.
+
+### Classifying Relationships
+
+We can add even more information by classifying the types of relationships with constraints. The first constraint we can use is the **Participation** constraint, which is placed between an **Entity Type** and **Relationship type**, this essentially means entities must relate at least once and is represented by a thick line from the entity to the relationship. There is also an **At-most-one** constraint, which is where the entity relates at most once and is represented by an arrow from the entity to the relationship. For example, in a Binary Relationship, we have a relationship between **Entity of type Lecturer** and **Entity of type Course** bound by the **Relationship of type Teaches** and here the relationship between the Course and Teaches is constrained with a **Participation Type**, whereas the Lecturer and Teaches are constrained with **At-most-one**. Semantically, we have a lecturer that can teach only one course. It is however possible to combine these constraints.
+
+### More Relationship Features
+
+It is also possible to associate relationships with attributes, which will look the same as when entity attributes are represented and refer to specific related entity combinations. Also, we can assign entities to roles in the context of specific relationships, these are represented as labels on the connecting edges and are required when connecting entities of the same type.
+
+## Schema Normalization
+
+
 
 ## Graph Databases
 
