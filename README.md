@@ -1,6 +1,6 @@
 # Databases
 
-Below are my study notes on a lecture about Database Systems by Prof. Trummer. I've made these notes to further my understanding of the inner-workings of databases and database management systems. A companion book for this lecture is: Database Management Systems by Johannes Gehrke and Raghu Ramakrishnan.
+Below are my study notes from an excellent lecture about Database Systems by Prof. Trummer at Cornell. I've made these notes to further my understanding of the inner-workings of databases and database management systems. A companion book for this lecture is: Database Management Systems by Johannes Gehrke and Raghu Ramakrishnan.
 
 ## Introduction To Database Systems
 
@@ -31,8 +31,8 @@ With DDL we define a database schema that describes the content we can have in o
 | id 	| name   	| surname  	| age 	| license-driving     	|
 |----	|--------	|----------	|-----	|---------------------	|
 | 1  	| mark   	| lasperre 	| 42  	| 1234-4321-1234-1234 	|
-| 2  	| robert 	| gershwin 	| 69  	| 4321-1234-1234-1234 	|
-| 3  	| adam   	| nakumi   	| 34  	| 1234-1234-1234-4321 	|
+| 2  	| tom   	| gershwin 	| 69  	| 4321-1234-1234-1234 	|
+| 3  	| travis 	| nakumi   	| 34  	| 1234-1234-1234-4321 	|
 
 ### Schema Definition in SQL
 
@@ -373,7 +373,7 @@ If we have data types that require a variable number of bytes in order to store 
 
 We must take this process of decomposition even further, because one record typically stores data from multiple columns, so we must think about how we can divide each slot into **fields**. We face all the same challenges introduced by fixed vs variable data types. For fixed length data types, we store field sizes in the database **catalogue**, and for variable length data types, we store field sizes on a **page** in one of the following ways. We can either use special **delimiters symbols** between fields, or store a **field directory** at the beginning of the record.
 
-### Row Stores vs, Column Stores
+### Row Stores versus Column Stores
 
 So far we have been looking at **row-store architecture**, which assumes data which belongs to the same row is stored close together. This is how traditional databases like Postgres function. There is another breed of database system that use **column-store architecture** which attempt to store data for the same column close together which is optimized for queries that only access a few related columns.
 
@@ -405,10 +405,17 @@ In the above example we have multiple **Index Pages IDs** which have student ID 
 
 ### Index Node Content
 
-Formally we can describe the structure of a an index tree as follows: The contents of **inner nodes** alternate between references to index pages and search keys `(R(0), K(1), R(1), K(2) ...)` where `R(i)` strictly leads to entries ordered before `K(i+1)`. `R(i)` in turn references an **index page**. The content of **leaf nodes** 
+Formally, we can describe the structure of an index tree as follows: The contents of **inner nodes** alternate between references to index pages and search keys `(R(0), K(1), R(1), K(2) ...)` where `R(i)` strictly leads to entries ordered before `K(i+1)`. `R(i)` in turn references an **index page**. The content of **leaf nodes** are as follows: `K(1), R(1), K(2), R(2), K(3), R(3), ...` where `R(i)` leads to data entries with key `K(i)`, and `R(i)` references a **data page** and a **slot** on that page.
 
-https://youtu.be/4cWkVbC2bNE?t=14903
+We can use these indexes to answer queries with **equality predicates**, for instance `WHERE studentname = 'Marshall'`. We can also use indexes for queries with **inequality predicates**, as in `WHERE age > 25`. Both of these examples work because the **predicates** reference an **index key**.
 
+### Using Index for Equality
+
+When searching for entries with, for instance **key value** `V`, we start at **root node** of the index and our search for i is as follows: `V >= K(i), V < K(i+1)`. We then follow the corresponding reference `R(i)` to the next index node until we reach a **leaf node**. Once we reach the leaf node, we see an entry exists for a corresponding key `K(i) = V`, and we **retrieve data** from `R(i)` if data is found, otherwise we **return empty**.
+
+### Linking Leaf Nodes
+
+Often we want to retrieve entries from **neighbouring** leaf nodes, in this case it would be good for performance if these leaf nodes are linked in some way where we can get node references from **parent nodes**. In this case we can **store pointers** to next and previous neighbours in the leaf page, these leaf pages essentially become **doubly linked lists**.
 
 ## Hash Indexes
 
@@ -436,21 +443,27 @@ https://youtu.be/4cWkVbC2bNE?t=14903
 
 ## Recovery After System Crashes 2
 
-## NO-SQL
+## Database Design
 
-## NEW-SQL
+## Database Normalization
 
-## Graph Data
+## Graph Databases
 
-## Spacial Data
+## Distributed Graph Processing
 
 ## Data Streams
+
+## Spatial Data
+
+## Querying Spatial Data
+
+## NoSQL and NewSQL
 
 ## Errata
 
 ### Popular Databases
 
-A non-exhaustive list of popular databases being used in professional environments as of 2022.
+A non-exhaustive list of popular databases being used in professional environments as of July 2022.
 
 * Redis - an in-memory data structure store, used as a distributed, in-memory key–value database.
 * Postgres - an open-source relational database management system emphasizing extensibility and SQL compliance
