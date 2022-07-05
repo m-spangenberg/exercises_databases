@@ -1,6 +1,6 @@
 # Databases
 
-Below are my study notes from an excellent lecture about Database Systems by Prof. Trummer at Cornell. I've made these notes to further my understanding of the inner-workings of databases and database management systems. A companion book for this lecture is: Database Management Systems by Johannes Gehrke and Raghu Ramakrishnan.
+Below are my study notes from an excellent lecture about Database Systems by Prof. Trummer at Cornell. I've made these notes to further my understanding of the inner-workings of database theory and database management systems. A companion book for this lecture is: Database Management Systems by Johannes Gehrke and Raghu Ramakrishnan.
 
 ## Introduction To Database Systems
 
@@ -481,11 +481,19 @@ We can add even more information by classifying the types of relationships with 
 
 ### More Relationship Features
 
-It is also possible to associate relationships with attributes, which will look the same as when entity attributes are represented and refer to specific related entity combinations. Also, we can assign entities to roles in the context of specific relationships, these are represented as labels on the connecting edges and are required when connecting entities of the same type.
+It is also possible to associate relationships with **attributes**, which will look the same as when entity attributes are represented and refer to specific related entity combinations. Also, we can assign entities to **roles** in the context of specific relationships, these are represented as labels on the connecting edges and are required when connecting entities of the same type.
+
+### Sub-Classes
+
+If you have programmed in any object oriented language before, you will be familiar with this concept. Sub-classing allows us to **reduce redundancy** by allowing the sub-class the ability to inherit attributes and relationships from its parent class. These sub-classes are represented by **triangles** with a label inside. It is important to note that there is no multiple inheritance as sub-classes form trees.
+
+### Weak Entities (Master/Slave, Parent/Child, Primary/Secondary)
+
+An entity that cannot stand by itself, it always depends on an owner entity which has a primary key which only becomes unique when it combines with the primary key of the owner entity.
+
+https://youtu.be/lxEdaElkQhQ?t=1848
 
 ## Schema Normalization
-
-
 
 ## Graph Databases
 
