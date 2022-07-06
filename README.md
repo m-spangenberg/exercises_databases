@@ -558,7 +558,13 @@ Example: Solution
 | Full Time  | 1,000  |
 | Part Time  | 500    |
 
-As you can see, we have removed the functional dependency between hours worked and salary by moving hours and salary into their own table, freeing us to reference hours for every TA, and even allowing us to 
+As you can see, we have removed the functional dependency between hours worked and salary by moving hours and salary into their own table, freeing us to reference hours for every TA, and even allowing us to modify salaries independently of hours worked, or make changes, without causing inconsistencies.
+
+So, more formally, we removed **redundancy** by **decomposing** the original table so that the functional dependency **does not** connect columns in the same table. Now the prior **anomalies** no longer happen and renders the previous FD essentially harmless. One important point to remember is that we must **avoid data loss** via decomposition, meaning if we join these tables again, we can recompose the previous table, this is called a **lossless decomposition**. Decomposing might need us to perform more **joins**.
+
+### Functional Dependencies and Redundancy
+
+https://youtu.be/lxEdaElkQhQ?t=5536
 
 ## Graph Databases
 
