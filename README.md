@@ -1,6 +1,6 @@
 # Databases
 
-Below are my study notes from an excellent lecture on Database Systems by Prof. Trummer at Cornell. I've made these notes to further my understanding of the inner-workings of database theory and database management systems. A companion book for this lecture is: Database Management Systems by Johannes Gehrke and Raghu Ramakrishnan.
+Below are my study notes from an excellent lecture on Database Systems ([Part I: Theory](https://www.youtube.com/watch?v=4cWkVbC2bNE&t=0s), [Part II: Design](https://www.youtube.com/watch?v=lxEdaElkQhQ&t=0s)) by Prof. Trummer at Cornell. I've made these notes to further my understanding of the inner-workings of database theory and database management systems. A companion book for this lecture is: Database Management Systems by Johannes Gehrke and Raghu Ramakrishnan.
 
 ## Introduction To Database Systems
 
@@ -497,10 +497,27 @@ With aggregation in ER Diagrams, we model the **relationship of relationships**,
 
 ### Design Choices: Entities vs. Attributes
 
-When modeling, we often have to choose between introducing new entities or adding attributes to an existing entity. For instance let us suppose we have an employee address, we can either introduce an address entity, or add this address information as an attribute to an existing entity such as an employee. The main thing to consider is whether the instance should be associated with multiple addresses. Remember, attributes in ER Diagrams must have simple types like strings or integers, they can only store single values, not sets of them. So if we want to model a scenario where we have multiple address attributes, they would have to be modeled as an entity. So our rule is as follows: If we need **multiple possible associations**, such as an Employee with multiple addresses, we **need to use an entity**. If we need to **structure the entity further with components or features**, such as giving an address a street name, **we can use attributes**.
+When modeling, we often have to choose between introducing new entities or adding attributes to an existing entity. For instance let us suppose we have an employee address, we can either introduce an address entity, or add this address information as an attribute to an existing entity such as an employee. The main thing to consider is whether the instance should be associated with multiple addresses. Remember, attributes in ER Diagrams must have simple types like strings or integers, they can only store single values, not sets of them. So if we want to model a scenario where we have multiple address attributes, they would have to be modeled as an entity. So our rule is as follows: If we need **multiple possible associations**, such as an Employee with multiple addresses, we **need to use an entity**. If we need to **structure the entity further with components or features**, such as giving an address a street name or postal code, **we can use attributes**.
 
+### ER Diagrams as Relations
+
+Now that we understand the formal language for creating ER Diagrams, we can use these Entity Relationship Diagrams to **translate** our conceptual thinking of relations into SQL commands for creating relations in a database. In order to represent these entity types as rows in a table, the entity becomes the row and the properties of that entity represent the columns, while underlined attributes are used as primary keys. When **translating relationships** we can consider the following generic approach: Columns will store primary keys of all connected entities. Rows represent relationships between specific entities. Our primary key is a combination of primary keys of entities and finally additional attributes become columns.
+
+### Translating Sub-Classes
+
+As a reminder, a sub-class is a specialization of another entity type. It inherits attributes from a parents class and **adds additional attributes** and relationships of its own. Entities of sub-classes may have additional attributes, and in order to translate sub-classes and superclasses into a relation schema we can use **multiple methods**:
+
+* **Separate relations** for superclass and sub-class.
+* Introduce **multiple relations** linking keys to attributes.
+* Use a **single relation for sub-class** and set unused attributes to null.
+
+### Translating Weak Entities
+
+We can translate weak entities in the following way: We have to introduce **new relation** for storing weak entities where we add **foreign key columns to the owner** entity. In SQL this would mean we would cascade delete depending on owner, because if we delete the owner, all entities dependant on the owner (weak entities), must also be deleted.
 
 ## Schema Normalization
+
+
 
 ## Graph Databases
 
