@@ -1,6 +1,6 @@
 # Databases
 
-Below are my study notes from an excellent lecture about Database Systems by Prof. Trummer at Cornell. I've made these notes to further my understanding of the inner-workings of database theory and database management systems. A companion book for this lecture is: Database Management Systems by Johannes Gehrke and Raghu Ramakrishnan.
+Below are my study notes from an excellent lecture on Database Systems by Prof. Trummer at Cornell. I've made these notes to further my understanding of the inner-workings of database theory and database management systems. A companion book for this lecture is: Database Management Systems by Johannes Gehrke and Raghu Ramakrishnan.
 
 ## Introduction To Database Systems
 
@@ -487,11 +487,18 @@ It is also possible to associate relationships with **attributes**, which will l
 
 If you have programmed in any object oriented language before, you will be familiar with this concept. Sub-classing allows us to **reduce redundancy** by allowing the sub-class the ability to inherit attributes and relationships from its parent class. These sub-classes are represented by **triangles** with a label inside. It is important to note that there is no multiple inheritance as sub-classes form trees.
 
-### Weak Entities (Master/Slave, Parent/Child, Primary/Secondary)
+### Weak Entities
 
-An entity that cannot stand by itself, it always depends on an owner entity which has a primary key which only becomes unique when it combines with the primary key of the owner entity.
+A weak entity, is an entity that cannot stand by itself, it always depends on an owner entity which has a primary key which only becomes unique when it combines with the **primary key of the owner entity**. There are many patterns used to describe this relationship, for instance **Master/Slave**, **Parent/Child**, and **Primary/Secondary**. The weak entity connects to the owner via an identifying relationship, in this relationship the weak entity has a primary key which becomes unique once combined with the primary key of the owner entity. There must be a **unique relationship** or relation of 'exactly-one' between the owner and weak entity, so weak entities can appear **at most once**.
 
-https://youtu.be/lxEdaElkQhQ?t=1848
+### Aggregation
+
+With aggregation in ER Diagrams, we model the **relationship of relationships**, where we surround a relationship with a dashed rectangle, which can then be connected with other objects in the diagram. We could for instance have departments where projects are sponsored, which in turn must be monitored by employees to ensure the funding is accounted for. This relationship of oversight is modeled with aggregation instead of a ternary relationship because the latter does not allow us to model all the constraints present otherwise.
+
+### Design Choices: Entities vs. Attributes
+
+When modeling, we often have to choose between introducing new entities or adding attributes to an existing entity. For instance let us suppose we have an employee address, we can either introduce an address entity, or add this address information as an attribute to an existing entity such as an employee. The main thing to consider is whether the instance should be associated with multiple addresses. Remember, attributes in ER Diagrams must have simple types like strings or integers, they can only store single values, not sets of them. So if we want to model a scenario where we have multiple address attributes, they would have to be modeled as an entity. So our rule is as follows: If we need **multiple possible associations**, such as an Employee with multiple addresses, we **need to use an entity**. If we need to **structure the entity further with components or features**, such as giving an address a street name, **we can use attributes**.
+
 
 ## Schema Normalization
 
