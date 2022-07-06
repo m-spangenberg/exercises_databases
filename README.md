@@ -517,7 +517,48 @@ We can translate weak entities in the following way: We have to introduce **new 
 
 ## Schema Normalization
 
+So now that we have a **first sketch** of the database schema via an ER Diagram we will most likely have a **sub-optimal** schema. There will be **data redundancy** and redundancy leads to various **problems**. We can remedy these problems and optimize the initial schema by doing **schema normalization**.
 
+The following topics will be our high level roadmap for the topic of database normalization:
+
+* **Functional Dependencies**: Indicate Redundancy
+* **Normal Forms**: Desirable Formal Schema Properties
+* **Normalization Algorithms**: Transform to Normal Form
+
+### Functional Dependencies (FD)
+
+We use FD to detect data redundancies, these redundancies are data we want to remove. It always applies to one specific table (it can apply across different tables in principle), and essentially states the values in some columns uniquely decide the value sin other columns. The notation would be `X --> Y` meaning values in X decide values in Y.
+
+Example: A Functional Dependance `Hours --> Salary`
+
+| TA Name | Hours     | Salary |
+|---------|-----------|--------|
+| John    | Full Time | 1,000  |
+| Mike    | Part Time | 500    |
+| Anna    | Part Time | 500    |
+| Lisa    | Full Time | 1,000  |
+
+Here we have a table where the hours table should imply the value of the salary column and is a functional dependency between the hours column and the salary column. A first problem is, we are wasting space, because the number of hours already implies the salary and storing the salary in each row is redundant. The second problem is is we wanted to give any of the TAs a raise, or if the hours worked change, we would have to make multiple changes in the table. These problems occur so often in database design that we have terms for them:
+
+* **Update Anomalies**: Where an update could make the TA salaries inconsistent.
+* **Insertion Anomalies**: Where we would not have salary info for altered hours worked.
+* **Deletion Anomalies**: Where we would lose salary info after deletion.
+
+Example: Solution
+
+| TA Name | Hours      |
+|---------|----------- |
+| John    | Full Time  |
+| Mike    | Part Time  |
+| Anna    | Part Time  |
+| Lisa    | Full Time  |
+
+| Hours      | Salary |
+|------------|--------|
+| Full Time  | 1,000  |
+| Part Time  | 500    |
+
+As you can see, we have removed the functional dependency between hours worked and salary by moving hours and salary into their own table, freeing us to reference hours for every TA, and even allowing us to 
 
 ## Graph Databases
 
