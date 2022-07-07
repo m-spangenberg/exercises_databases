@@ -1,6 +1,6 @@
 # Databases
 
-Below are my study notes from an excellent lecture on Database Systems ([Part I: Theory](https://www.youtube.com/watch?v=4cWkVbC2bNE&t=0s), [Part II: Design](https://www.youtube.com/watch?v=lxEdaElkQhQ&t=0s)) by Prof. Trummer at Cornell. I've made these notes to further my understanding of the inner-workings of database theory and database management systems. A companion book for this lecture is: Database Management Systems by Johannes Gehrke and Raghu Ramakrishnan.
+Below are my study notes from an excellent lecture on Database Systems ([Part I: Theory](https://www.youtube.com/watch?v=4cWkVbC2bNE&t=0s), [Part II: Design](https://www.youtube.com/watch?v=lxEdaElkQhQ&t=0s)) by Prof. Trummer at Cornell. I've made these notes to further my understanding of database theory and the inner-workings of database management systems. A companion book for this lecture is: Database Management Systems by Johannes Gehrke and Raghu Ramakrishnan.
 
 - [Databases](#databases)
   - [Introduction To Database Systems](#introduction-to-database-systems)
@@ -90,6 +90,7 @@ Below are my study notes from an excellent lecture on Database Systems ([Part I:
       - [Comparison of Normal Forms](#comparison-of-normal-forms)
     - [Normalization Algorithms](#normalization-algorithms)
       - [Decomposition](#decomposition)
+      - [Towards Boyce-Codd Normal Form (BCNF)](#towards-boyce-codd-normal-form-bcnf)
   - [Graph Databases](#graph-databases)
   - [Distributed Graph Processing](#distributed-graph-processing)
   - [Data Streams](#data-streams)
@@ -795,6 +796,38 @@ BCNF dissalows any redundancy
 It is ultimately our goal to transform our conceptual database into a normal form which satisfies the need to reduce redundancy. We approach this through algorithms.
 
 #### Decomposition
+
+When working through Normal Forms, we notice that they impose conditions on functional dependencies in **single tables**. To satisfy the conditions, we must **decompose** tables into smaller tables. This process of decomposition must allow us to **reconstruct** the original data.
+
+Let's assume we decompose `R into X and Y`, We can do so if `X subset of Y implies X` or `X subset of Y implies Y` is a functional dependency. We can then match each row from Y to one row from X or each frow from X to one row from Y. If we are able to do this, it means our decomposition was lossless.
+
+Example: Lossless Decomposition - Table A (Constraint: Hours implies Salary)
+
+| TA Name  | Hours     | Office |
+|----------|-----------|--------|
+| John     | Full Time | 401b   |
+| Mike     | Part Time | 205    |
+| Anna     | Part Time | 310    |
+| Lisa     | Full Time | 112    |
+
+Example: Lossless Decomposition - Table B (Constraint: Hours implies Salary)
+
+| Hours     | Salary |
+|-----------|--------|
+| Full Time | 1,000  |
+| Part Time | 500    |
+
+**NB!**: There exists a slightly confusing term called **Lossy Recomposition**, which actually means when performing recomposition, we end up with excess and often inconsistent data.
+
+#### Towards Boyce-Codd Normal Form (BCNF)
+
+The algorithm concerning BCNF is relatively straighforward.
+
+* **Repeat** while some FD `A implies b on R` violates BCNF rules
+  * **Decompose** R into R-b and Ab
+* All Decompositions are **lossless** as `(R-b) instersection of Ab=A implies b`
+* **Terminates** as tables get smaller and smaller
+* End result may **depend** on decompositon order
 
 ## Graph Databases
 
