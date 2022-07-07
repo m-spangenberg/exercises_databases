@@ -94,6 +94,7 @@ Below are my study notes from an excellent lecture on Database Systems ([Part I:
       - [Dependency Preservation](#dependency-preservation)
       - [Towards Third Normal Form (3NF)](#towards-third-normal-form-3nf)
   - [Graph Databases](#graph-databases)
+    - [Graph Data](#graph-data)
   - [Distributed Graph Processing](#distributed-graph-processing)
   - [Data Streams](#data-streams)
   - [Spatial Data](#spatial-data)
@@ -858,7 +859,33 @@ For third normal form, we essentially do something similar to BCNF, the only dif
 
 ## Graph Databases
 
-So far, we have been discussing tabular relational data because it is very popular in practice, but there exists other data formats  
+So far, we have been discussing tabular relational data because it is very popular in practice, but there exists other data formats.
+
+### Graph Data
+
+A graph is nothing more than a set of nodes and a set of edges connecting those nodes. Nodes and Edges are often associated with labels and additionally we can associate them with properties, which give us aditional information about entities or their relationships.
+
+In the real world, we have datasets which are natural to represent as large graphs. For instance: social networks, knowledge graphs, communication graphs, road networks and many more.
+
+How would we go about representing a Graph of say, a route of train station stops, as a Relational Database? We could probably introduce a table for the nodes, and another table for the address which perhaps has foreign key references to the nodes.
+
+```sql
+CREATE TABLE Stations(
+  StationID in primary key, name text);
+
+CREATE TABLE Connected(
+  StationID1 int, StationID2,
+  primary key (StationID1, StationID2),
+  foreign key (StationID1) references Stations(StationID1),
+  foreign key (StationID2) references Stations(StationID2)
+);
+```
+
+Now, we perhaps want to query this database for all possible connections, or in this case routes from one place to another.
+
+```sql
+
+```
 
 ## Distributed Graph Processing
 
