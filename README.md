@@ -562,9 +562,62 @@ As you can see, we have removed the functional dependency between hours worked a
 
 So, more formally, we removed **redundancy** by **decomposing** the original table so that the functional dependency **does not** connect columns in the same table. Now the prior **anomalies** no longer happen and renders the previous FD essentially harmless. One important point to remember is that we must **avoid data loss** via decomposition, meaning if we join these tables again, we can recompose the previous table, this is called a **lossless decomposition**. Decomposing might need us to perform more **joins**.
 
-### Functional Dependencies and Redundancy
+#### Functional Dependencies and Redundancy
 
-https://youtu.be/lxEdaElkQhQ?t=5536
+In general, **FDs** state that values in X determine values in Y. There is a **redundant** storage of Y if X is stored multiple times, it is therefore **sufficient** to store Y once for each X value. It is our goal to design a schema that avoids redundancy and considers all possible future database states. For most normal forms we will try to avoid functional dependencies which apply to columns in the same table, however, there are **exceptions** to this rule: Primary keys are acceptable functional dependencies. Trivial functional dependencies are also ok, because there is no practical way to remove them from a given table.
+
+#### Finding Functional Dependencies
+
+Functional Dependencies allow us to detect redundancy and we can try to decompose tables accordingly, but first we have to find them. One common mistake is to try finding these FDs by **looking at the data**, the data we see reflects the **current state**, but the data does not anticipate future data or changes in requirements. This means **not all** functional dependencies will appear initially and data may suggest misleading **"pseudo FDs"**. Two valid sources for mining FDs are: **Domain knowledge**, or in other words understanding processes in the business or environment, and by **inferring** new FDs from given FDs.
+
+#### Inferring Functional Dependencies
+
+How can we infer more functional dependencies? Formally, our notation is as follows: `F1 |= F2`, which means FDs F1 imply FDs F2. Here, no relation can satisfy F1 without satisfying F2. We can use three relatively simple axioms called **Armstrong's Axioms** to infer all possible functional dependencies:
+
+* **Reflexivity**: if Y us subset of X then X implies Y.
+* **Augmentation**: if X  implies Y and Y implies Z then X implies Z.
+* **Transitivity**: If x implies Y and Y implies Z then X implies Z.
+
+Example: Inferring FDs
+
+```bash
+F = {
+  {Course} -> {Lecturer},
+  {Course} -> {Department},
+  {Lecturer, Department} -> {Office},
+}
+
+# FDs are inferred from F:
+
+* {Course, Department} -> {Department}
+* {Course, Lecture} -> {Department, Lecture}
+* {Course} -> {Office}
+```
+
+Given
+
+1. {Course} -> {Lecturer}
+2. {Course} -> {Department}
+3. {Lecturer, Department} -> {Office}
+
+Inferred
+
+4. {Course} -> {Course, Lecturer}
+5. {Course, Lecturer} -> {Lecturer, Department}
+6. {Course} -> {Lecturer, Department}
+7. {Course} -> {Office}
+
+#### Functional Dependency Closure
+
+A closure of a set of FDs are **all** implied FDs: `F+ = {f|F|=f}` and can be calculated using Armstrong's axioms. F is a cover for G if F+ = G+ and essentially means they are equivalent. The closure can be extremely large and can be impractical to deal with.
+
+#### Attribute Closure
+
+Functional dependency closures can be extremely large, rendering them impractical to handle in practice. Because of this we use attribute closures in order to narrow down the functional dependencies we are trying to infer.
+
+### Normal Forms
+
+### Normalization Algorithms
 
 ## Graph Databases
 
