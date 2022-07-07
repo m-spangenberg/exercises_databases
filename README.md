@@ -91,6 +91,8 @@ Below are my study notes from an excellent lecture on Database Systems ([Part I:
     - [Normalization Algorithms](#normalization-algorithms)
       - [Decomposition](#decomposition)
       - [Towards Boyce-Codd Normal Form (BCNF)](#towards-boyce-codd-normal-form-bcnf)
+      - [Dependency Preservation](#dependency-preservation)
+      - [Towards Third Normal Form (3NF)](#towards-third-normal-form-3nf)
   - [Graph Databases](#graph-databases)
   - [Distributed Graph Processing](#distributed-graph-processing)
   - [Data Streams](#data-streams)
@@ -684,7 +686,7 @@ F = {
   {Course} -> {Department},
   {Lecturer, Department} -> {Office},
 }
-```
+
 
 FDs are inferred from F:
 
@@ -704,6 +706,7 @@ Inferred
 5. {Course, Lecturer} -> {Lecturer, Department}
 6. {Course} -> {Lecturer, Department}
 7. {Course} -> {Office}
+```
 
 #### Functional Dependency Closure
 
@@ -829,7 +832,33 @@ The algorithm concerning BCNF is relatively straighforward.
 * **Terminates** as tables get smaller and smaller
 * End result may **depend** on decompositon order
 
+Example:
+
+```bash
+# Bring the following into BCNF
+CSJDPQV, key C, JP implies C, SD implies P, J implies S
+
+# Solution:
+For SD implies P, decompose into SDP, CSJDQV
+For J implies S, decompose CSJDQV into JS, CJDQV
+Final database schema: SDP, JS, CJDQV
+```
+
+#### Dependency Preservation
+
+One thing that BCNF cannot gaurantee is that we preserve all dependencies. In general we assume we **decompose** a relation R into X and Y, now assume we **enforce** FDs on X and Y separately, in other words, we verify all FDs that only use attributes from X then we verify all FDs using attributes from only Y. We have implicitly enforced all FDs on R if **dependency preserving**. It is reasonable to say that dependency preservation is at odds with trying to decompose things as much as neccesary in order to avoid redundancy.
+
+#### Towards Third Normal Form (3NF)
+
+For third normal form, we essentially do something similar to BCNF, the only diference being to preserve dependencies we create new **extensions** to relations. If we have dependency `A implies b` and this is **broken** by decomposition, we then add relation `Ab`. In order to make this work, we must use something called **minimal cover** functional dependencies.
+
+* on the right hand side of the functional dependency we have a **single attribute**
+* closure chnages when **deleting and functional dependency**
+* closure changes when **deleting any attribute**
+
 ## Graph Databases
+
+So far, we have been discussing tabular relational data because it is very popular in practice, but there exists other data formats  
 
 ## Distributed Graph Processing
 
