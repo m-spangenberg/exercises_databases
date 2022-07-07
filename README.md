@@ -2,6 +2,103 @@
 
 Below are my study notes from an excellent lecture on Database Systems ([Part I: Theory](https://www.youtube.com/watch?v=4cWkVbC2bNE&t=0s), [Part II: Design](https://www.youtube.com/watch?v=lxEdaElkQhQ&t=0s)) by Prof. Trummer at Cornell. I've made these notes to further my understanding of the inner-workings of database theory and database management systems. A companion book for this lecture is: Database Management Systems by Johannes Gehrke and Raghu Ramakrishnan.
 
+- [Databases](#databases)
+  - [Introduction To Database Systems](#introduction-to-database-systems)
+    - [Database Management Systems (DBMS)](#database-management-systems-dbms)
+    - [Structured Query Language (SQL)](#structured-query-language-sql)
+    - [Data Definition Language (DDL)](#data-definition-language-ddl)
+    - [Schema Definition in SQL](#schema-definition-in-sql)
+    - [Integrity Constraints](#integrity-constraints)
+    - [Primary Key Constraints](#primary-key-constraints)
+    - [Foreign Key Constraint](#foreign-key-constraint)
+    - [Introduction To SQL](#introduction-to-sql)
+      - [Data Manipulation Language (DML)](#data-manipulation-language-dml)
+      - [Inserting Data](#inserting-data)
+      - [Deleting Data](#deleting-data)
+      - [Updating Data](#updating-data)
+    - [Simple SQL Data Analysis](#simple-sql-data-analysis)
+      - [Simplification by Alias](#simplification-by-alias)
+      - [Predicate Statements](#predicate-statements)
+      - [Composite Predicates](#composite-predicates)
+      - [Select Clauses](#select-clauses)
+      - [Join Syntax](#join-syntax)
+      - [Distinct](#distinct)
+      - [Aggregation](#aggregation)
+      - [Group Predicates](#group-predicates)
+      - [Ordering Syntax](#ordering-syntax)
+    - [More Advanced SQL Features](#more-advanced-sql-features)
+      - [Unknown Values](#unknown-values)
+      - [Joins with Unknowns](#joins-with-unknowns)
+      - [Set Operations](#set-operations)
+      - [Query Nesting](#query-nesting)
+      - [Sub-Queries in Conditionals](#sub-queries-in-conditionals)
+  - [Data Storage](#data-storage)
+    - [Data Storage Hardware](#data-storage-hardware)
+    - [Relevance for DBMS](#relevance-for-dbms)
+  - [Data Storage Formats](#data-storage-formats)
+    - [Tables as Files](#tables-as-files)
+    - [From Files to Pages](#from-files-to-pages)
+    - [From Pages to Slots](#from-pages-to-slots)
+    - [Fixed-Length Records](#fixed-length-records)
+    - [Variable-Length Records](#variable-length-records)
+    - [From Slots to Fields](#from-slots-to-fields)
+    - [Row Stores versus Column Stores](#row-stores-versus-column-stores)
+  - [Tree Indexes](#tree-indexes)
+    - [Quickly Finding Data](#quickly-finding-data)
+    - [Indexes](#indexes)
+    - [How It Works](#how-it-works)
+    - [Index Node Content](#index-node-content)
+    - [Using Index for Equality](#using-index-for-equality)
+    - [Linking Leaf Nodes](#linking-leaf-nodes)
+  - [Hash Indexes](#hash-indexes)
+  - [Query Processing Overview](#query-processing-overview)
+  - [Operation Implementations](#operation-implementations)
+  - [Hash Join, Sort-Merge Join](#hash-join-sort-merge-join)
+  - [More Operators and Query Plans](#more-operators-and-query-plans)
+  - [Query Optimization](#query-optimization)
+  - [Transactions](#transactions)
+  - [Isolation vis Concurrency Control](#isolation-vis-concurrency-control)
+  - [Two-Phase Locking](#two-phase-locking)
+  - [More on Locking](#more-on-locking)
+  - [Concurrency Control Without Locking](#concurrency-control-without-locking)
+  - [Recovery After System Crashes 1](#recovery-after-system-crashes-1)
+  - [Recovery After System Crashes 2](#recovery-after-system-crashes-2)
+  - [Database Design](#database-design)
+  - [Conceptual Design (ER Diagrams)](#conceptual-design-er-diagrams)
+    - [Entities and Attributes](#entities-and-attributes)
+    - [Relationships](#relationships)
+    - [Classifying Relationships](#classifying-relationships)
+    - [More Relationship Features](#more-relationship-features)
+    - [Sub-Classes](#sub-classes)
+    - [Weak Entities](#weak-entities)
+    - [Aggregation](#aggregation-1)
+    - [Design Choices: Entities vs. Attributes](#design-choices-entities-vs-attributes)
+    - [ER Diagrams as Relations](#er-diagrams-as-relations)
+    - [Translating Sub-Classes](#translating-sub-classes)
+    - [Translating Weak Entities](#translating-weak-entities)
+  - [Schema Normalization](#schema-normalization)
+    - [Functional Dependencies (FD)](#functional-dependencies-fd)
+      - [Functional Dependencies and Redundancy](#functional-dependencies-and-redundancy)
+      - [Finding Functional Dependencies](#finding-functional-dependencies)
+      - [Inferring Functional Dependencies](#inferring-functional-dependencies)
+      - [Functional Dependency Closure](#functional-dependency-closure)
+      - [Attribute Closure](#attribute-closure)
+      - [Finding All Relation Keys](#finding-all-relation-keys)
+    - [Normal Forms](#normal-forms)
+      - [Boyce-Codd Normal Form (BCNF)](#boyce-codd-normal-form-bcnf)
+      - [Third Normal Form (3NF)](#third-normal-form-3nf)
+      - [Comparison of Normal Forms](#comparison-of-normal-forms)
+    - [Normalization Algorithms](#normalization-algorithms)
+      - [Decomposition](#decomposition)
+  - [Graph Databases](#graph-databases)
+  - [Distributed Graph Processing](#distributed-graph-processing)
+  - [Data Streams](#data-streams)
+  - [Spatial Data](#spatial-data)
+  - [Querying Spatial Data](#querying-spatial-data)
+  - [NoSQL and NewSQL](#nosql-and-newsql)
+  - [Errata](#errata)
+    - [Popular Databases](#popular-databases)
+
 ## Introduction To Database Systems
 
 ### Database Management Systems (DBMS)
@@ -586,13 +683,13 @@ F = {
   {Course} -> {Department},
   {Lecturer, Department} -> {Office},
 }
+```
 
-# FDs are inferred from F:
+FDs are inferred from F:
 
 * {Course, Department} -> {Department}
 * {Course, Lecture} -> {Department, Lecture}
 * {Course} -> {Office}
-```
 
 Given
 
@@ -613,11 +710,91 @@ A closure of a set of FDs are **all** implied FDs: `F+ = {f|F|=f}` and can be ca
 
 #### Attribute Closure
 
-Functional dependency closures can be extremely large, rendering them impractical to handle in practice. Because of this we use attribute closures in order to narrow down the functional dependencies we are trying to infer.
+Functional dependency closures can be extremely large, rendering them impractical to handle in practice. Because of this we use attribute closures in order to narrow down the functional dependencies we are trying to infer, for this we use a sub-set called an Attribute Closure. Formally this is explained as: closure of an attribute x is the set of all attributes that are functional dependencies on X with respect to F. It is denoted by X+ which means what X can determine. This is useful for checking if one specific Functional Dependency is implied. For instance, we often want to check if FD which have specific attributes on the left hand side and whether they can be inferred from given FDs, to do this we need to use the attribute closure.
+
+Approach for finding attribute closures:
+
+* **Goal**: Get attribute closure of X given functional dependencies F
+* **Repeat**: Until no changes remain
+  * Start with **closure X**
+  * **Iterate** over all functional dependencies of A implies B in F
+  * **If** closure subset of A **then** add B to closure
+
+Example: Attribute Closure
+
+* **F = {A implies D, AB implies E, BI implies E, CD implies I, E implies C}**
+  * We want to find the attribute closure of **(AE)+**
+  * Remember the **Attribute Closure** is merely a subset of **Functional Dependency Closure**.
+
+* Iterations:
+
+  1. **(AE)** We start with AE
+  2. **(ACDE)** We find that E implies C and A implies D
+  3. **(ACDEI)** We find CD implies I
+  4. No change
+
+#### Finding All Relation Keys
+
+Finding keys is generally important for assessing redundancy. In principle, we can apply the following algorithm to get th full set of all possible keys:
+
+* **Iterate** over all attribute sets A
+  * **Check** if A is a key:
+    * Calculate **attribute closure** (A)+
+    * It's a **key** if (A)+ includes all attributes
 
 ### Normal Forms
 
+We say a schema is in a normal form when it has certain desirable schema properties with regards to redundancy. We will cover the most important normal forms, but in practice there are many more.
+
+#### Boyce-Codd Normal Form (BCNF)
+
+In order to verify whether a given schema is in **BCNF** form, the following conditions must hold true:
+
+* **For all FDs** A implies b whose attributes are in the same table
+  * Either b is an element in A (in other words a **"trivial"** FD)
+  * Or A contains a key of its associated table
+* This must apply to given and inferred FDs! **BCNF does not allow any redundancy**
+
+Is this schema in BCNF?
+
+```bash
+# Schema
+table1(a,b), table2(a,d,e), tablec(c,d)
+
+# Initial Functional Dependencies
+{a implies b, bc implies d, a implies c, d implies ae}
+```
+
+#### Third Normal Form (3NF)
+
+This is another normal form commonly used in practice, and is a little more permissive than BCNF requiring only only 1 out of 3 conditions to be satisfied for each functional dependency. We can formally explain **3NF** with the following:
+
+* **For all FDs** A implies b whose attributes are in the same table
+  * Either b is element in A (**trivial** FD)
+  * or A **contains a key** of its associated table
+  * or b **is part** of some minimal key <-- **Allows for some redundancy**
+* This must apply to given and inferred FDs!
+
+Is the above schema in 3NF? (_Yes, if something is BCNF, it automatically is 3NF_)
+
+#### Comparison of Normal Forms
+
+If you have functional dependencies, we often want to verify that freshly inserted data satisfies functional dependencies. When attempting to satisfy BCNF we might have to decompose tables so far, that in order to verify FDs for new data, we will need to perform additional, expensive joins. If we allow a little bit of redundancy, it could preserve dependencies, reducing our need to make joins. So, relaxing requirements allows for some _pros_ and some _cons_, as below:
+
+```diff
+BCNF dissalows any redundancy
+++Pro: avoids all negative effects of redundancy
+--Con: may require breaking up dependencies (requiring more joins to verify FDs)
+3NF allows redundancy in some cases
+++Pro: can always preserve dependencies
+--Con: may still have some negative effects
+```
+
 ### Normalization Algorithms
+
+It is ultimately our goal to transform our conceptual database into a normal form which satisfies the need to reduce redundancy. We approach this through algorithms.
+
+#### Decomposition
 
 ## Graph Databases
 
