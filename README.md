@@ -103,6 +103,8 @@ Below are my study notes from an excellent lecture on Database Systems ([Part I:
       - [Updating Nodes](#updating-nodes)
       - [Finding Relationships](#finding-relationships)
       - [Updating Relationships](#updating-relationships)
+      - [Deletions](#deletions)
+      - [Demo in Neo4j Sandbox](#demo-in-neo4j-sandbox)
   - [Distributed Graph Processing](#distributed-graph-processing)
   - [Data Streams](#data-streams)
   - [Spatial Data](#spatial-data)
@@ -862,7 +864,7 @@ One thing that BCNF cannot gaurantee is that we preserve all dependencies. In ge
 For third normal form, we essentially do something similar to BCNF, the only diference being to preserve dependencies we create new **extensions** to relations. If we have dependency `A implies b` and this is **broken** by decomposition, we then add relation `Ab`. In order to make this work, we must use something called **minimal cover** functional dependencies.
 
 * on the right hand side of the functional dependency we have a **single attribute**
-* closure chnages when **deleting and functional dependency**
+* closure changes when **deleting and functional dependency**
 * closure changes when **deleting any attribute**
 
 ## Graph Databases
@@ -958,6 +960,8 @@ CREATE (a)-[:Enrolled {semester: 'FS20'}]->(b)
   * Inserts egde from `a` to `b` with label "Enrolled"
   * Edge has property "semester" set to "FS20"
 
+note: notice the '->' use of the arrow, this denotes an edge that points FROM node a TO node b. When creating edges we must always define directions.
+
 #### Updating Nodes
 
   * Change label of Marc from Student to Alumnus
@@ -988,7 +992,59 @@ MATCH (a:Student {name: 'Marc'})
     * Edge labeled "Enrolled", property semester is 'FS20'
   * Assign resulting edges to variable `e`
 
+note: notice the lack of '->' arrows, this means we are not making any restrictions to the directions our nodes are related. When searching we do not need to define directions.
+
 #### Updating Relationships
+
+```sql
+MATCH (a:Student {name: 'Marc'})
+  -[e:Enrolled {semester: 'FS20'}]-
+  (b:Course {name:'CS4320'})
+SET e.semester = 'FS21'
+```
+
+* Get edge representing enrollement of Marc in CS4320
+* Update value of semester property to "FS21"
+
+#### Deletions
+
+```sql
+MATCH (a:Student {name: 'Marc'})
+DELETE a
+```
+
+  * Deletes all students with name 'Marc' from the database
+
+#### Demo in Neo4j Sandbox
+
+Let's practice some of the Cypher Queries above in Neo4j.
+
+```
+# create an empty database node
+create ()
+
+# create a student node with the name property marc
+create (:Student {name: 'Marc'})
+
+# create a student node with the name property maria
+create (:Student {name: 'Maria'})
+
+# create a course node with the name property cs4320
+create (:Course {name: 'CS4320'})
+
+# select all students as variable s and courses with name property cs4320
+# and create a relationship between s and c called enrolled
+match (s:Student), (c:Course {name: 'CS4320'}) create (s) -[:Enrolled]-> (c)
+
+# delete the relationship between students and their course
+match (s:Student) -[e]- (c:Course) delete e
+
+# delete all the students
+match (s:Student) delete s
+
+# delete the course
+match (c:Course) delete c
+```
 
 ## Distributed Graph Processing
 
