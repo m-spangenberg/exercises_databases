@@ -1,4 +1,4 @@
-## Excercise: The Bookstore
+## Exercise: The Bookstore
 
 * Create a simple bookstore database
 * Create a functional schema that deals with books and writers
