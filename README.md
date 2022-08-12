@@ -95,6 +95,14 @@ Below are my study notes from an excellent lecture on Database Systems ([Part I:
       - [Towards Third Normal Form (3NF)](#towards-third-normal-form-3nf)
   - [Graph Databases](#graph-databases)
     - [Graph Data](#graph-data)
+    - [Graph Database Systems (Neo4j)](#graph-database-systems-neo4j)
+      - [Cypher Query Language](#cypher-query-language)
+      - [Creating Nodes](#creating-nodes)
+      - [Finding Nodes](#finding-nodes)
+      - [Creating Relationships](#creating-relationships)
+      - [Updating Nodes](#updating-nodes)
+      - [Finding Relationships](#finding-relationships)
+      - [Updating Relationships](#updating-relationships)
   - [Distributed Graph Processing](#distributed-graph-processing)
   - [Data Streams](#data-streams)
   - [Spatial Data](#spatial-data)
@@ -881,11 +889,106 @@ CREATE TABLE Connected(
 );
 ```
 
-Now, we perhaps want to query this database for all possible connections, or in this case routes from one place to another.
+Now, we perhaps want to query this database for all possible connections, or in this case routes from one place ("Port Authority") to another ("NYU"). To search paths which have multpile steps to them with a standard SQL query, we might have to chain multiple self-joins in order to keep reference to the the first connected station through to the destination station, as is shown in the below SQL template. This is fine for retrieving paths with a fixed length, but is not the most ellegant way to solve this problem, and could probably be solved better with more advanced SQL features.
 
 ```sql
-
+SELECT * from Connected C1
+  join Connected C2 on (C1.stationid2 = C2.stationid1)
+  join Connected C3 on (C2.stationid2 = C3.stationid1)
+  ... join connected Cn ...
+WHERE C1.name = 'Port Authority'
+  and Cn.name = 'NYU'
 ```
+
+The intermediate conclustion is that:
+
+  * Storing graph data in relational DBMS is `possible`
+  * But Querying graphs via vanilla SQL is `inconvenient`
+  * Also, may increase `efficiency` by graph specialization
+
+### Graph Database Systems (Neo4j)
+
+All of these systems have slightly different query languages and slightly different functionality, but all of them are targeted at graph data. Let's focus on one of the more popular systems called neo4j and highlight some of the key differences between it and standard SQL.
+
+  * **neo4j**
+  * Dgraph
+  * ArangoDB
+  * OrientDB
+  * JanusGraph
+  * FlockDB
+  * ...etc
+
+#### Cypher Query Language
+
+  * `Graph query language` used by Neo4j
+  * Allows `creating/updating` nodes and relationships
+  * Allows `searching` graphs for complex patterns
+  * `Aggregation`, filtering, sub-queries etc.
+  * Inspired by `SQL` in some aspects
+
+#### Creating Nodes
+
+  * `Create ()`
+    * Create node without labels or properties
+  * `CREATE (:Student)`
+    * Create node labeled as student, no properties
+  * `CREATE (:Student {name: 'Marc'})`
+    * Create node labeled as student, name set to 'Marc'
+
+#### Finding Nodes
+
+Now before we can add edges to the graph, we must first identify specific nodes so that we may assign relationships (edges) between said nodes. Below we find nodes labeled as 'Student' with the name property 'Marc' and assign the matched result to a variable m.
+
+  * `Match (m: Student {name: 'Marc'})`
+    * Finds nodes labeled as 'Student'
+    * Name property must be set to 'Marc'
+    * Match result is assigned to variable m
+    * Variable m can be used in remaining query
+
+#### Creating Relationships
+
+```sql
+MATCH (a:Student {name: 'Marc'}),
+  (b:Course {name: 'CS4320'})
+CREATE (a)-[:Enrolled {semester: 'FS20'}]->(b)
+```
+
+  * Matches `a` to students with name "Marc"
+  * Matches `b` to courses with name "CS4320"
+  * Inserts egde from `a` to `b` with label "Enrolled"
+  * Edge has property "semester" set to "FS20"
+
+#### Updating Nodes
+
+  * Change label of Marc from Student to Alumnus
+
+```sql
+MATCH (m:Student {name: 'Marc'})
+SET m:Alumnus
+```
+
+  * Change value of name property to "Marcus"
+
+```sql
+MATCH (m: Student {name: 'Marc'})
+SET m.name = 'Marcus'
+```
+
+#### Finding Relationships
+
+```sql
+MATCH (a:Student {name: 'Marc'})
+  -[e:Enrolled {semester: 'FS20'}]-
+  (b:Course {name: 'CS4320'})
+```
+
+  * Find edges connecting nodes a and b such that
+    * Node `a` is a student with the name 'Marc'
+    * Node `b` is a course with the name 'CS4320'
+    * Edge labeled "Enrolled", property semester is 'FS20'
+  * Assign resulting edges to variable `e`
+
+#### Updating Relationships
 
 ## Distributed Graph Processing
 
