@@ -112,6 +112,9 @@ Below are my study notes from an excellent lecture on Database Systems ([Part I:
   - [NoSQL and NewSQL](#nosql-and-newsql)
   - [Errata](#errata)
     - [Popular Databases](#popular-databases)
+      - [PostGreSQL](#postgresql)
+      - [Neo4j](#neo4j)
+      - [Redis](#redis)
 
 ## Introduction To Database Systems
 
@@ -1071,3 +1074,42 @@ A non-exhaustive list of popular databases being used in professional environmen
 * Apache Cassandra - an open-source, distributed, wide-column store, NoSQL database management system
 * Elasticsearch - a distributed, multi tenant-capable full-text search engine
 * Neo4j - ACID-compliant transactional database with native graph storage and processing
+
+#### PostGreSQL
+
+#### Neo4j
+
+#### Redis
+
+**What is Redis?**
+
+Redis stands for **Remote Dictionary Server**, and is an in-memory database that operates in system memory as aposed to disk storage. It is often used as a cache to improve performance of other, slower databases. It can however be used as a primary database that can store and persist data formats. Traditionally when deploying Microservice apps, the storage and data retrieval considerations can become quite complex, requiring a RDBMS, full text search, graphs, document storage and caching, and we would use various tools to accomplish this: MySQL + Elasticsearch + Neo4j + MongoDB + Redis. But this introduces a couple of problems. Each of these systems have to be maintained, they need to be able to integrate with each other meaning more logic, more complexity, more latency, and once hundreds of thousands or even millions of people start using our app, they will scale differently.
+
+This is where Redis comes in, with one database handling data in a multi-modal way, meaning we can have multiple types of databases condensed into a single database, we can extend Redis with modules that can target specific needs:
+
+* Redis Core        key-value-store
+* RediSearch        full-text-search
+* RedisGraph        graphed-network-store
+* RedisTimeSeries   time-series-store
+* RedisJSON         json-store
+
+**Data Persistance and Durability**
+
+How does our data persist when the database operates in volatile memory?
+
+* Snapshotting -> Produces single-file point-in-time snapshtos of the dataset that gets dumped to disk.
+* Append Only File (AOF) -> Pushes all operations to a read-only file on disk in real-time.
+
+For persistance and durability the practice practice deployment strategy here is to place the AOF on separate storage. This means the Append-Only-File is accessed from block storage on another server, while the Redis service runs in RAM on its respective instances, and finally the snapshots get persisted on disk somewhere else allowing for more replication and fewer critical failure points.
+
+**Redis on Flash**
+
+Where the standard Redis model is to have everything in RAM, Redis offers `enterprise functionality` called Redis on Flash, which as the name suggest, stores 'Hot' values, which are frequently accesed in RAM, and less frequently or 'Warm' values are stores on flash storage in order to maximize capacity and save on infrastructure costs.
+
+**Scaling Redis**
+
+* Clustering -> Master instances and Replica nodes
+* Sharding -> Splitting the database into smaller chunks of data split between nodes
+* Active-Active Cluster Deployment -> Geographically distributed cluster deployments
+  * Conflict-Free Replicated Data Types -> merges changes between clusters without data-loss
+* Kubernetes deployment!
