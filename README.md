@@ -1077,7 +1077,11 @@ A non-exhaustive list of popular databases being used in professional environmen
 
 #### PostGreSQL
 
+**What is PostGreSQL?**
+
 #### Neo4j
+
+**What is Neo4j?**
 
 #### Redis
 
