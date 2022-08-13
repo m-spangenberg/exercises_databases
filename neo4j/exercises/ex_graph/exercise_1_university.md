@@ -5,9 +5,17 @@
     * Cornell University is located in Ithaca
     * Corner offers a course with the name "CS4320"
 
-![exercise result](exercise.svg)
+### Clean Start
 
+```bash
+# Due to a limitation of the community edition, you won't be able to create multiple DBs.
+# To clear the current database first perform the following Cypher Query
+MATCH (n) DETACH DELETE n
 ```
+
+### Cypher Queries
+
+```bash
 # initialize empty node database
 create ()
 
@@ -34,3 +42,6 @@ create (:Course {name: 'CS4320'})
 match (k:Course {name: 'CS4320'}), (u:University {name: 'Cornell'}) create (k) -[:Programs]-> (u)
 ```
 
+### Resulting Graph Network
+
+![exercise result](exercise.svg)
