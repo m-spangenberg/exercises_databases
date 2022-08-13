@@ -3,7 +3,7 @@
   * Create a graph DB representing the following situation:
     * Ithaca and Binghamton are cities in New York State.
     * Cornell University is located in Ithaca
-    * Corner offers a course with the name "CS4320"
+    * Cornell offers a course with the name "CS4320"
 
 ### Clean Start
 
