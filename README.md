@@ -107,6 +107,7 @@ Below are my study notes from an excellent lecture on Database Systems ([Part I:
       - [Demo in Neo4j Sandbox](#demo-in-neo4j-sandbox)
       - [Pattern-Based Retrieval](#pattern-based-retrieval)
       - [Aggregation](#aggregation-2)
+      - [Complex Patterns](#complex-patterns)
   - [Distributed Graph Processing](#distributed-graph-processing)
   - [Data Streams](#data-streams)
   - [Spatial Data](#spatial-data)
@@ -1065,7 +1066,7 @@ RETURN s
 
 To vary depth, in other words, to recursively search or chain relationsin order to search for the friends of their friends, and so on.
 
-* '*0..2' in this context would chain a search between 0 and 2 connections: Marc, his friends, and the friends of his friends.
+* '*0..2' in this context would chain a search between 0 and 2 connections, or in other words all the students that can be reached in at most two steps: Marc, his friends, and the friends of his friends. Essentially, between the first node and second node, we can have up to two edges. With zero edges it refers to the node itself.
 
 ```sql
 MATCH (:Student {name: 'Marc'})
@@ -1074,6 +1075,28 @@ RETURN s
 ```
 
 #### Aggregation
+
+We can also aggregate the number of occurances of a pattern using the count clause, as in SQL.
+
+```sql
+MATCH (:Student {name: 'Marc'})
+  -[:friendsWith]-> (s:Student)
+RETURN count(*)
+```
+
+#### Complex Patterns
+
+There is also the ability to do more complex pattern matching.
+
+* Find all friends of Marc and Maria who have at least one course in common with them, excluding CS4320
+
+```sql
+MATCH (s1:Student) -[:friendsWith]-> (s2:Student),
+  (s1)-[:Enrolled]->(c:Course), (s2)-[:Enrolled]->(c)
+WHERE s1.name IN ['Marc', 'Maria']
+  AND NOT c.name = 'CS4320'
+RETURN s2
+```
 
 
 
