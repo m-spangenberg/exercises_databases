@@ -108,7 +108,12 @@ Below are my study notes from an excellent lecture on Database Systems ([Part I:
       - [Pattern-Based Retrieval](#pattern-based-retrieval)
       - [Aggregation](#aggregation-2)
       - [Complex Patterns](#complex-patterns)
+    - [Data Layout](#data-layout)
+    - [Query Processing](#query-processing)
+    - [Transaction Processing](#transaction-processing)
   - [Distributed Graph Processing](#distributed-graph-processing)
+    - [Motivations: Large Graphs](#motivations-large-graphs)
+      - [Example: PageRank](#example-pagerank)
   - [Data Streams](#data-streams)
   - [Spatial Data](#spatial-data)
   - [Querying Spatial Data](#querying-spatial-data)
@@ -1098,9 +1103,69 @@ WHERE s1.name IN ['Marc', 'Maria']
 RETURN s2
 ```
 
+* Retrieve courses taken by at least one student who also takes CS4320
 
+```sql
+MATCH (c1:Course {name: 'CS4320'})
+  -[:Enrolled]- (s:Student) -[:Enrolled]- (c2:Course)
+RETURN c2
+```
+
+Going back to the initial question of trainstations in New York, we can now see that we can return a path of arbitrary length showing the connections between two stations with a much more concise query than we could with vanilla SQL.
+
+```sql
+MATCH (s1:Station) -[]:Connected*- (s2:Station)
+RETURN *
+```
+
+### Data Layout
+
+The Neo4j system uses a specialized data layout which makes it especially useful for traversing graphs. It uses one data loayout which it uses to store data on hard disk and another to store data in memory.
+
+* In-Memory data layour is optimized for `fast traversal`
+* `Nodes` stored with labels, properties, and edge references
+  * Nodes store list of incoming and outgoing edges
+* `Edges` stored with label, properties, and node references
+
+### Query Processing
+
+When a query is processed by Neo4j, it is translated into a query plan.
+
+* Query plans composed from `standard operators`
+  * Most known from SQL: filtering, projection, ...
+  * A few graph-specific operators (eg: shortest path)
+* Can use `indices` to retrieve specfic nodes/edges
+* Query plans are selected via cost-based `optimization`
+
+### Transaction Processing
+
+We can also process transactions. Read-commited isolation is an isolation level also present in SQL, which means we can only see the values which have been written by commited-transaction.
+
+* Neo4j supports `read-committed` isolation by default
+* Aquire locks manually to achieve a `higher isolation` level
+* Uses logging to persistant storage to achieve `durability`
+* Overall: can support `ACID`
 
 ## Distributed Graph Processing
+
+### Motivations: Large Graphs
+
+What could motivate the need for distributing graph processes? Usually it is tightly coupled with resource limits or resource availability.
+
+* Graphs may `exceed` resource limits of single machines
+  * Graphs representing the entire `Web` (Google)
+  * Graphs representing large `social networks` (Facebook)
+* This motivates graph processing in `clusters`
+
+#### Example: PageRank
+
+The goal of the PageRank algorithm is essentially to associate nodes
+
+* Google ranks search results via the `PageRank` algorithm
+* Operates on a graph representation of the `Web`
+  * `Nodes` represent Web sites
+  * `Edges` represent links
+* Pages with higher PageRank are preferable
 
 ## Data Streams
 
