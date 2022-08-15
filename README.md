@@ -105,6 +105,8 @@ Below are my study notes from an excellent lecture on Database Systems ([Part I:
       - [Updating Relationships](#updating-relationships)
       - [Deletions](#deletions)
       - [Demo in Neo4j Sandbox](#demo-in-neo4j-sandbox)
+      - [Pattern-Based Retrieval](#pattern-based-retrieval)
+      - [Aggregation](#aggregation-2)
   - [Distributed Graph Processing](#distributed-graph-processing)
   - [Data Streams](#data-streams)
   - [Spatial Data](#spatial-data)
@@ -1022,7 +1024,7 @@ DELETE a
 
 Let's practice some of the Cypher Queries above in Neo4j.
 
-```
+```bash
 # create an empty database node
 create ()
 
@@ -1048,6 +1050,32 @@ match (s:Student) delete s
 # delete the course
 match (c:Course) delete c
 ```
+
+#### Pattern-Based Retrieval
+
+The way we query graphs is to typically use some sort of matching expression and then a return clause to indicate which part of the pattern we're matching we want returned as a query result.
+
+* Look for the friends of the student called 'Marc'
+
+```sql
+MATCH (:Student {name: 'Marc'})
+  -[:friendsWith]-> (s:Student)
+RETURN s
+```
+
+To vary depth, in other words, to recursively search or chain relationsin order to search for the friends of their friends, and so on.
+
+* '*0..2' in this context would chain a search between 0 and 2 connections: Marc, his friends, and the friends of his friends.
+
+```sql
+MATCH (:Student {name: 'Marc'})
+  -[:friendsWith*0..2]-> (s:Student)
+RETURN s
+```
+
+#### Aggregation
+
+
 
 ## Distributed Graph Processing
 
