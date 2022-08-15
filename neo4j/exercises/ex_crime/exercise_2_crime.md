@@ -2,12 +2,12 @@
 
 Take the the court roll from the local newspaper and transform it into a graph visualizing the following relationships:
 
-    * The court, the town (municipality), the region, the country
-    * The individuals, their case info, and their court dates
+* The court, the town (municipality), the region, the country
+* The individuals, their case info, and their court dates
 
 Newspaper sampled (public record):
 
-    Namib Times: Issue #6977 - FRIDAY 12 AUGUST 2022 - Page 4.
+Namib Times: Issue #6977 - FRIDAY 12 AUGUST 2022 - Page 4.
 
 ### Clean Start
 
