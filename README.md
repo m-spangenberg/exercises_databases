@@ -115,6 +115,16 @@ Below are my study notes from an excellent lecture on Database Systems ([Part I:
     - [Motivations: Large Graphs](#motivations-large-graphs)
       - [Example: PageRank](#example-pagerank)
   - [Data Streams](#data-streams)
+    - [Traditional Data Ingestion](#traditional-data-ingestion)
+    - [Stream Data Requirements](#stream-data-requirements)
+    - [Stream Data Management Systems](#stream-data-management-systems)
+    - [Data Stream Topics](#data-stream-topics)
+      - [Data Types](#data-types)
+      - [Classes of Operations](#classes-of-operations)
+      - [Stream to Relation](#stream-to-relation)
+      - [Relation to Stream](#relation-to-stream)
+      - [Example Queries](#example-queries)
+      - [Query Processing](#query-processing-1)
   - [Spatial Data](#spatial-data)
   - [Querying Spatial Data](#querying-spatial-data)
   - [NoSQL and NewSQL](#nosql-and-newsql)
@@ -315,6 +325,8 @@ A predicate is not a conditional. A conditional statement allows for branching l
 * Abreviated join: `<table1> JOIN <table2> USING (<col>)`
 * Natural join: automatically join columns with the same name: `<table1> NATURAL JOIN <table2>`
 * Terse form of a Standard join: `FROM <table1>, <table2> WHERE <join-condition>`
+
+![Common SQL Joins](https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/SQL_Joins.svg/800px-SQL_Joins.svg.png)
 
 #### Distinct
 
@@ -1232,7 +1244,110 @@ Better Performance with Combiners
 
 ## Data Streams
 
+Data streams are never ending sources of new data which we might want to observe patterns in.
 
+* Data is contantly being generated
+  * Stock market ticker
+  * Network monitoring
+  * Sensors
+* May need to react to specific patterns in real time
+  * Fraud detection
+  * Medical intervention
+  * Stock sales
+
+### Traditional Data Ingestion
+
+The traditional method of ingesting data has been to use an extract-transform-load mechanism, which takes data sources that generate data and at regular intervals (nightly), extract it from its source, transform it into a suitable format, load it into a database warehouse and then perform some SQL queries in order to draw conclusions from the ingested data (analyze). The problem is, this is not suitable for real-time use. In this scenario we are at best able to react to last night's updates.
+
+### Stream Data Requirements
+
+* Traditional `ETL` supports queries on static snapshots
+* `Delay` between snapshots is often too high
+* Streams keep `generating` new data with high frequency
+* Query results keep `changing` (for query on stream)
+* Hence, it is useful ot keep queries `running`
+
+### Stream Data Management Systems
+
+If we compare stream data management systems to database management systems, DBMS assume relatively static datasets, and the other assumes datasets are constantly changing, meaning our query result will keep changinh but the result can be observed so we keep running that query for long periods of time to extract meaning from changing the data.
+
+|         | Database Management | Stream Data Management |
+|---------|---------------------|------------------------|
+| Data    | Static              | Dynamic                |
+| Queries | Dynamic             | Static                 |
+
+### Data Stream Topics
+
+* Stanford's STREAM System (~2003)
+  * First "Stream Data Management System"
+* ksqlDB (~2020)
+  * Recent system for distributed stream processing
+
+#### Data Types
+
+| Data**base** Management System                    | Data **Stream** Management System   |
+|---------------------------------------------------|-------------------------------------|
+| Relation R: **static** (until changed explicitly) | RelationR(t): **varies** overt time |
+|                                                   | **Stream** S: timestamped tuples    |
+
+#### Classes of Operations
+
+Can be generally classified as:
+
+* Relation as input and produce Relations as output (SQL compatible)
+* Streams input and produces Relations as output, and vice-versa
+
+#### Stream to Relation
+
+* Relation R(t) is specified as a `window` over stream S
+* Tuple-based sliding window: `S [Rows N]`
+  * R(t) contains N tuples freomS with highet timestamps
+* TIme-based sliding window `S [Range T]`
+  * R(t) contains tuples from S starting from Now() - T
+* Partitioned sliding window: `S [Partition by A1, A2 ... Rows N]`
+  * Separate windows for each value combination in A1, ...
+
+#### Relation to Stream
+
+* `Istream(R)`: R's inserted tuples with insertion timestamp
+* `Dstream(R)`: R's deleted tuples with deletion timestamp
+* `Rstream(R)`: R's current content with current timestamp
+
+#### Example Queries
+
+Below are some examples of the Continuous Query Language used with DSM Systems. You will notice, the query result will keep changing over time.
+
+* Select the average price of the last 10 rows of Apple stock.
+
+```sql
+SELECT Avg(price) FROM StockPriceStream [Rows 10]
+WHERE stock = 'AAPL'
+```
+
+* Select all customers and their orders within the last 2 minutes.
+
+```sql
+SELECT * FROM Customer C
+  JOIN Orders [Range 2 Minutes] O
+  ON (C.customerKey = O.customerKey)
+```
+
+* Show a stream of tuples and insertion timestamps of clicks on advertisements over the last 30 seconds.
+
+```sql
+SELECT Istream() FROM (
+  SELECT * FROM Clicks [Range 30 Seconds] C
+  JOIN Advertisers A ON (C.advKey = A.advKey)
+)
+```
+
+#### Query Processing
+
+* Input query is compile into continuous `query plan`
+* Query plan is compsoed from `standed operators`
+* Operators exchange tuple `additions` and `deletions`
+  * `Streams` produce only tuple additions
+  * `Relations` produce additions and delettions
 
 ## Spatial Data
 
