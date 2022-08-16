@@ -133,6 +133,8 @@ Below are my study notes from an excellent lecture on Database Systems ([Part I:
       - [Constraint Example](#constraint-example)
     - [Constraint Types](#constraint-types)
     - [Scheduling Policy](#scheduling-policy)
+      - [Scheduling Example](#scheduling-example)
+    - [Approximation](#approximation)
   - [Spatial Data](#spatial-data)
   - [Querying Spatial Data](#querying-spatial-data)
   - [NoSQL and NewSQL](#nosql-and-newsql)
@@ -1422,12 +1424,34 @@ note: we can exploit each constraint for dropping tuples in certain scenarious
 
 ### Scheduling Policy
 
+As a reminder: In a stream data management system, different operators in a query plan communicate via queues, each operator has an input and output queue, and in those queues we have information about what changed in the data: what was inserted or deleted.
+
 * We have `flexibility` to decide when to invoke operators
 * Scheduling policy may influence `queue sizes`
-* `FIFO`: fully process tuple batches in the order of arrival
+* `FIFO` (First In First Out): fully process tuple batches in the order of arrival
 * `Greedy`: invoke operator discarding most tuples
 * `Mix`: combine operators into chains
   * FIFO scheduling within chain, greedy across chains
+
+#### Scheduling Example
+
+Our assumptions here is that for every timestep we have one new tuple batch passed to the Input Queue.
+
+Input Queue --> Operator 1 (Selectivity: Filter 20%) --> Intermediate Result Queue --> Operator 2 --> Output Queue
+
+| Policy     | T=0 | T=1 | T=2 | T=3 | T=4 | T=5 | T=6 |
+|------------|-----|-----|-----|-----|-----|-----|-----|
+| **FIFO**   | 1.0 | 1.2 | 2.0 | 2.2 | 3.0 | 3.2 | 4.0 |
+| **Greedy** | 1.0 | 1.2 | 1.4 | 1.6 | 1.8 | 2   | 2.2 |
+
+### Approximation
+
+* `Load shedding`: drop tuples to save overheads
+  * Can approximate aggregates based on samples
+  * Try to balance impact over all aggregates
+* `Reducing synopses` sizes: save memory
+  * Often reduces output size of following operators
+    * With possible exception...
 
 ## Spatial Data
 
