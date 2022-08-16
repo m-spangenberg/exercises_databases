@@ -1150,7 +1150,7 @@ We can also process transactions. Read-commited isolation is an isolation level 
 
 ### Motivations: Large Graphs
 
-What could motivate the need for distributing graph processes? Usually it is tightly coupled with resource limits or resource availability.
+The need for distributed system are typically tightly coupled with resource limits. If we have a very large collection of data that would benefit from being presented as a graph, it is often not possible to represent that data on one system alone.
 
 * Graphs may `exceed` resource limits of single machines
   * Graphs representing the entire `Web` (Google)
@@ -1159,15 +1159,80 @@ What could motivate the need for distributing graph processes? Usually it is tig
 
 #### Example: PageRank
 
-The goal of the PageRank algorithm is essentially to associate nodes
-
 * Google ranks search results via the `PageRank` algorithm
 * Operates on a graph representation of the `Web`
   * `Nodes` represent Web sites
   * `Edges` represent links
 * Pages with higher PageRank are preferable
 
+Random Surfer
+
+* PageRank is based on the `random surfer` model
+* Random surfer `starts` from a random Web site
+* Randomly selects outgoing `links` to follow
+  *  May select `random` page with probability α
+  *  Selects random page from entire Web if `no outgoing` links
+* PageRank: `probability` to visit site at specific instant
+
+Calculating PageRank
+
+* We can calculate PageRank via an `iterative` algorithm
+* We initialize each node's PageRank to `1/NumberNodes` <- uniform random distribution
+* In each iteration, we `redistribite` PageRank over links <- iterate until convergence
+  * Each node partitions PageRank among outgoing links
+  * PageRank in next iteration is sum over incomming links
+
+Pregel Overview
+
+* `Pregel` is a system of distributed graph processing
+* Proposed in 2010 (Google), `PageRank` is use case
+* Pregel `distributes` graph partitionsover cluster nodes
+* Worker nodes process their partitions in `parallel`
+
+Pregel Computation Model
+
+* Computation is divided into `iterations` called 'supersteps'
+* In each iteration, we invoke `Compute` for each node
+  * Compute function can be `customized` by the user
+  * `Input`: messages sent to this vertex (node) in prior iterations
+  * Can `message` other nodes, delivered in next iteration
+* Computation ends once all nodes vote to `halt`
+
+In this approach a `coordinator` optimizes partitioning to nodes with the highest number of interactions, which then are handed to workers, allowing for `parallel processing`.
+
+  Worker 1 -> Graph Partition 1 -> Nodes {...}
+  Workier 2 -> Graph Partition 2 -> Nodes {...}
+
+Fault Tollerance
+
+*  Check pointing with workers `persisting` input and state at iteration start
+*  Coordinator `detects` worker failures via pings
+   *  `Recovery` may start serveral supersteps earlier
+   *  `Re-partition` graph to replace failed workers
+* `Confined recovery` restricted to failed partitions <- more refined mechanism with higher logging
+  * Requires persisting outgoing messages as well
+
+PageRank in Pregel
+
+note: this example does not consider random jumps and dead-ends
+
+```bash
+# Implement the compute function, which will be invoked for each node and each iteration
+Compute(ReceivedPR : int[])  # Incomming messages correspond to packages of page rank value
+  NewPR = sum(ReceivedPR)  # Calculate our new page rank value by summing up all the recieved page rank values
+  For o in OutgoingLinks:  # Iterate over outgoing links
+    Send(o.target, NewPR/|OutgoingLinks|)  # Send new values to outgoing links
+```
+
+Better Performance with Combiners
+
+* Basic version `sends` lots of page rank values
+* Can `aggregate` messages via custom "Combiners"
+* Here: can combine page rank for same target as `sum`
+
 ## Data Streams
+
+
 
 ## Spatial Data
 
