@@ -116,15 +116,23 @@ Below are my study notes from an excellent lecture on Database Systems ([Part I:
       - [Example: PageRank](#example-pagerank)
   - [Data Streams](#data-streams)
     - [Traditional Data Ingestion](#traditional-data-ingestion)
-    - [Stream Data Requirements](#stream-data-requirements)
+      - [Stream Data Requirements](#stream-data-requirements)
     - [Stream Data Management Systems](#stream-data-management-systems)
-    - [Data Stream Topics](#data-stream-topics)
+      - [Data Stream Topics](#data-stream-topics)
       - [Data Types](#data-types)
-      - [Classes of Operations](#classes-of-operations)
+    - [Classes of Operations](#classes-of-operations)
       - [Stream to Relation](#stream-to-relation)
       - [Relation to Stream](#relation-to-stream)
       - [Example Queries](#example-queries)
-      - [Query Processing](#query-processing-1)
+    - [Query Processing](#query-processing-1)
+      - [Join Algorithm](#join-algorithm)
+      - [Example Query Plan](#example-query-plan)
+    - [Adaptive Query Planning](#adaptive-query-planning)
+    - [Minimizing Space Requirements](#minimizing-space-requirements)
+      - [Synopsis Sharing](#synopsis-sharing)
+      - [Constraint Example](#constraint-example)
+    - [Constraint Types](#constraint-types)
+    - [Scheduling Policy](#scheduling-policy)
   - [Spatial Data](#spatial-data)
   - [Querying Spatial Data](#querying-spatial-data)
   - [NoSQL and NewSQL](#nosql-and-newsql)
@@ -1259,7 +1267,7 @@ Data streams are never ending sources of new data which we might want to observe
 
 The traditional method of ingesting data has been to use an extract-transform-load mechanism, which takes data sources that generate data and at regular intervals (nightly), extract it from its source, transform it into a suitable format, load it into a database warehouse and then perform some SQL queries in order to draw conclusions from the ingested data (analyze). The problem is, this is not suitable for real-time use. In this scenario we are at best able to react to last night's updates.
 
-### Stream Data Requirements
+#### Stream Data Requirements
 
 * Traditional `ETL` supports queries on static snapshots
 * `Delay` between snapshots is often too high
@@ -1276,7 +1284,7 @@ If we compare stream data management systems to database management systems, DBM
 | Data    | Static              | Dynamic                |
 | Queries | Dynamic             | Static                 |
 
-### Data Stream Topics
+#### Data Stream Topics
 
 * Stanford's STREAM System (~2003)
   * First "Stream Data Management System"
@@ -1290,7 +1298,7 @@ If we compare stream data management systems to database management systems, DBM
 | Relation R: **static** (until changed explicitly) | RelationR(t): **varies** overt time |
 |                                                   | **Stream** S: timestamped tuples    |
 
-#### Classes of Operations
+### Classes of Operations
 
 Can be generally classified as:
 
@@ -1309,8 +1317,8 @@ Can be generally classified as:
 
 #### Relation to Stream
 
-* `Istream(R)`: R's inserted tuples with insertion timestamp
-* `Dstream(R)`: R's deleted tuples with deletion timestamp
+* `Istream(R)`: R's `inserted tuples` with insertion timestamp
+* `Dstream(R)`: R's `deleted tuples` with deletion timestamp
 * `Rstream(R)`: R's current content with current timestamp
 
 #### Example Queries
@@ -1341,13 +1349,85 @@ SELECT Istream() FROM (
 )
 ```
 
-#### Query Processing
+### Query Processing
 
 * Input query is compile into continuous `query plan`
 * Query plan is compsoed from `standed operators`
 * Operators exchange tuple `additions` and `deletions`
   * `Streams` produce only tuple additions
   * `Relations` produce additions and delettions
+
+The basic model thoese operators follow is one or multiple input queues composed of addition or deletion messages and output queues that contain deletion or addition messages, the important thing is that the operators must respect timestamp order. These components are enough for simple operators, for example: filtering. Joining operators are slighly more complicated and rely on so-called 'query synopsis' which store the intermediate state in synopsis (short summary), which can be a hash-table. For instance, for a join operator we would have two input queues 'input 1' and 'input 2', passed to an Operator which then gets compared to a Hash Table for 'input 1' and 'input 2', the the example below we illustrate the algorithm you would use for this join operator.
+
+#### Join Algorithm
+
+* Tuple `addition/deletion` in Input 1 Queue
+  * Extract `join key` from added tuple
+  * `Probe` hash table of Input 2 with key
+  * Add/delete resulting join tuples to `output`
+  * `Update` synopsis (hash table for Input 1)
+
+#### Example Query Plan
+
+Let's see what is involved when there are multiple operaters with the query plan below:
+
+```sql
+SELECT * FROM S1 [Row 1,000], S2 [Range 2 Minutes]
+  WHERE S1.A = S2.A and S1.A > 10
+```
+
+* Pass S1 into a Row Window Operator and S2 into Time Window Operator to a Join Operator then into a Filter operator on S1
+
+### Adaptive Query Planning
+
+As properties can change over time in data streams, we might need to adapt to changes and process our streams differently. In Adaptive Query Planning means we start with one query point, but as time progresses and the data stream changes, our query adapts and re-optimizes. To achieve this, we have the Executor, the Profiler and the Re-Optimizer. The executor is the execution engines that executes our query plans, the re-optimizer revises our query plans, and the profiler is a component that generates statistic that are used by the re-optimizer for planning. The re-optimizer can also request specific statistic from the profiler. These three components revise the planning deciisions over time based on the data properties we observe. The most important decision is Join Order, Caching, and specific Constraints.
+
+### Minimizing Space Requirements
+
+* Very important for streams (`unbounded` size)
+* Eliminate redundant data via `synopsis sharing`
+* `Exploit constraints` to prine unnecessary data
+* Shrink intermediate results via `optimized scheduling`
+
+#### Synopsis Sharing
+
+The synpopsis is the state which needs to be maintained by operators in your query plan.
+
+* Synopsis of operators in same plan often `overlap`
+* Storing synopses separately means `redundancy`
+* Instead: `global` synopses with operator-specific views
+* Can extend to merge synopses from `different plans`
+
+#### Constraint Example
+
+```sql
+SELECT * FROM Orders [Rows Unbounded] O
+  JOIN Fullfillment [Rows Unbounded] F
+  ON (O.orderID = F.orderID)
+```
+
+This example above requires unbounded (infinite) synopses without contraints. This is wasteful and to be avoided at all costs! Let's make some assumptions. Assumption 1: Orders arrive before fullfillments and Assumption 2: Fullfillments clustered by orderID. We can use these constraints to reduce the size of a potentially unbounded hash-table as follows: When an order arrives, we can delete the fullfillment which refers to previous orders and we could only store the orders and ignore the fullfillment. We can simplify even more by discarding/pruning entries associated with orderID's once they are processed, because the orders are clustered.
+
+### Constraint Types
+
+* `Referential integrity` k-constraint
+  * Refers to key-foreign key joins
+  * Delay at most k between matching tuples arriving
+* `Ordered-arrivals` k-constraint
+  * Stream elements at least k tuples apart are sorted
+* `Clustered-arrival` k-contraint
+  * Elements with same key can be at most k tuples apart
+
+note: we can exploit each constraint for dropping tuples in certain scenarious
+
+### Scheduling Policy
+
+* We have `flexibility` to decide when to invoke operators
+* Scheduling policy may influence `queue sizes`
+* `FIFO`: fully process tuple batches in the order of arrival
+* `Greedy`: invoke operator discarding most tuples
+* `Mix`: combine operators into chains
+  * FIFO scheduling within chain, greedy across chains
 
 ## Spatial Data
 
@@ -1383,7 +1463,7 @@ A non-exhaustive list of popular databases being used in professional environmen
 
 **What is Redis?**
 
-Redis stands for **Remote Dictionary Server**, and is an in-memory database that operates in system memory as aposed to disk storage. It is often used as a cache to improve performance of other, slower databases. It can however be used as a primary database that can store and persist data formats. Traditionally when deploying Microservice apps, the storage and data retrieval considerations can become quite complex, requiring a RDBMS, full text search, graphs, document storage and caching, and we would use various tools to accomplish this: MySQL + Elasticsearch + Neo4j + MongoDB + Redis. But this introduces a couple of problems. Each of these systems have to be maintained, they need to be able to integrate with each other meaning more logic, more complexity, more latency, and once hundreds of thousands or even millions of people start using our app, they will scale differently.
+Redis stands for **Remote Dictionary Server**, and is an in-memory database that operates in system memory as opposed to disk storage. It is often used as a cache to improve performance of other, slower databases. It can however be used as a primary database that can store and persist data formats. Traditionally when deploying Microservice apps, the storage and data retrieval considerations can become quite complex, requiring a RDBMS, full text search, graphs, document storage and caching, and we would use various tools to accomplish this: MySQL + Elasticsearch + Neo4j + MongoDB + Redis. But this introduces a couple of problems. Each of these systems have to be maintained, they need to be able to integrate with each other meaning more logic, more complexity, more latency, and once hundreds of thousands or even millions of people start using our app, they will scale differently.
 
 This is where Redis comes in, with one database handling data in a multi-modal way, meaning we can have multiple types of databases condensed into a single database, we can extend Redis with modules that can target specific needs:
 
