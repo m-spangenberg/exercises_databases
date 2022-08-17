@@ -135,6 +135,10 @@ Below are my study notes from an excellent lecture on Database Systems ([Part I:
     - [Scheduling Policy](#scheduling-policy)
       - [Scheduling Example](#scheduling-example)
     - [Approximation](#approximation)
+    - [ksqlDB Architecture](#ksqldb-architecture)
+      - [Apache Kafka Overview](#apache-kafka-overview)
+      - [Kafka Topics](#kafka-topics)
+      - [Distributed Processing](#distributed-processing)
   - [Spatial Data](#spatial-data)
   - [Querying Spatial Data](#querying-spatial-data)
   - [NoSQL and NewSQL](#nosql-and-newsql)
@@ -1452,6 +1456,35 @@ Input Queue --> Operator 1 (Selectivity: Filter 20%) --> Intermediate Result Que
 * `Reducing synopses` sizes: save memory
   * Often reduces output size of following operators
     * With possible exception...
+
+### ksqlDB Architecture
+
+#### Apache Kafka Overview
+
+* A Java-base, distributed `stream processing` engine
+* `Producers` can add records to different topics
+* `Consumers` can subscribe to specific topics
+* Kafka Streams API offers filter/grouping... `operators`
+* Example: used by Uber for passenger-driver matching
+
+#### Kafka Topics
+
+* Each topic corresponds to a log of `ordered records`
+  * Each record is a `key-value` pair
+* `Producers` append to this log - no updates/deletes
+* `Consumers` receive updates for topics they subscribed to
+* `Regular` topic: delete tuples by space/time constraint
+* `Compacted` topic: new tuples overide old keys
+
+#### Distributed Processing
+
+* Each topic is divided into `partitions`
+* Partitions are `replicated` across servers
+  * `Fault tollerance` by redundancy
+  * Allows to `scale` to more consumers
+* Each partition has one dedicated `leader`
+  * Leader accepts topics `updates`
+  * `Synchronizes` with other replicas
 
 ## Spatial Data
 
