@@ -139,6 +139,9 @@ Below are my study notes from an excellent lecture on Database Systems ([Part I:
       - [Apache Kafka Overview](#apache-kafka-overview)
       - [Kafka Topics](#kafka-topics)
       - [Distributed Processing](#distributed-processing)
+      - [Coping with Insertions](#coping-with-insertions)
+      - [Optimizing for Reads](#optimizing-for-reads)
+      - [Log Structure Merge Tree](#log-structure-merge-tree)
   - [Spatial Data](#spatial-data)
   - [Querying Spatial Data](#querying-spatial-data)
   - [NoSQL and NewSQL](#nosql-and-newsql)
@@ -1485,6 +1488,26 @@ Input Queue --> Operator 1 (Selectivity: Filter 20%) --> Intermediate Result Que
 * Each partition has one dedicated `leader`
   * Leader accepts topics `updates`
   * `Synchronizes` with other replicas
+
+#### Coping with Insertions
+
+* Need to handle insertions with a `very high` frequency
+* Kafka Streams use `RocksDB` as underlying engine
+* Highly `optimized for writes`, good read performance
+  * Key idea: `sequential` (instead of random) access
+
+#### Optimizing for Reads
+
+* Typically use `index structure` to speed up reads
+  * Example: `B+ tree` seen earlier in the lecture
+* But then insertions require `random` data access
+* Leads to `slow insertions` - not acceptable for streams!
+
+#### Log Structure Merge Tree
+
+(with leveling merge policy)
+
+
 
 ## Spatial Data
 
