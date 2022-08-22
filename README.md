@@ -142,7 +142,20 @@ Below are my study notes from an excellent lecture on Database Systems ([Part I:
       - [Coping with Insertions](#coping-with-insertions)
       - [Optimizing for Reads](#optimizing-for-reads)
       - [Log Structure Merge Tree](#log-structure-merge-tree)
+      - [Reading LSM Trees](#reading-lsm-trees)
+    - [ksqlDB](#ksqldb)
+      - [Creating Collections](#creating-collections)
+      - [Deriving Collections](#deriving-collections)
+      - [Inserting Data](#inserting-data-1)
+      - [Query Types](#query-types)
+    - [Streams Summary](#streams-summary)
   - [Spatial Data](#spatial-data)
+    - [Types of Spatial Data](#types-of-spatial-data)
+    - [Types of Spatial Queries](#types-of-spatial-queries)
+    - [Outlook: Indexing](#outlook-indexing)
+      - [The Problem with B+ Trees](#the-problem-with-b-trees)
+      - [Z-Ordering](#z-ordering)
+      - [Indexing with Z-Ordering](#indexing-with-z-ordering)
   - [Querying Spatial Data](#querying-spatial-data)
   - [NoSQL and NewSQL](#nosql-and-newsql)
   - [Errata](#errata)
@@ -1449,7 +1462,7 @@ Input Queue --> Operator 1 (Selectivity: Filter 20%) --> Intermediate Result Que
 | Policy     | T=0 | T=1 | T=2 | T=3 | T=4 | T=5 | T=6 |
 |------------|-----|-----|-----|-----|-----|-----|-----|
 | **FIFO**   | 1.0 | 1.2 | 2.0 | 2.2 | 3.0 | 3.2 | 4.0 |
-| **Greedy** | 1.0 | 1.2 | 1.4 | 1.6 | 1.8 | 2   | 2.2 |
+| **Greedy** | 1.0 | 1.2 | 1.4 | 1.6 | 1.8 | 2.0 | 2.2 |
 
 ### Approximation
 
@@ -1507,9 +1520,132 @@ Input Queue --> Operator 1 (Selectivity: Filter 20%) --> Intermediate Result Que
 
 (with leveling merge policy)
 
+* Maintains `multiple levels` containing sorted/indexed data
+  * Upper levels are stored in `main memory`
+  * Lower levels are stored on `hard disk`
+  * Constant `size ratio` between consecutive levels
+* Data from one level is `merged` into next at overflow
+  * Merge operations need only `sequential` writes
 
+#### Reading LSM Trees
+
+* May have to check `every level` to find data
+* Checking each level is `fast` as data is sorted/indexed
+* `Bloom filters` reduce the number of levels to consider
+  * We have seen Bloom filters for distributed joins
+  * Bloom filter captures non-empty hash buckets
+  * Used to summarizse keys present at each level
+
+### ksqlDB
+
+* `High-level API` on top of Kafka Streams
+* Translates `SQL-like queries` to Kafka Operators
+  * Some similarities to STREAM query language
+* Processes `collections` of events: streams and tables
+* `Pull queries` execute once on current state
+* `Push query` results get continuously updated
+
+#### Creating Collections
+
+```sql
+CREATE STREAM priceHistory(symbol varchar, price int)
+WITH (kafka_topic = 'tickerTopic', value_format = 'JSON')
+```
+
+```sql
+CREATE TABLE curStockPrice(
+  symbol varchar PRIMARY KEY, price int)
+WITH (kafka_topic = 'tickerTopic', value_format = 'JSON')
+```
+
+#### Deriving Collections
+
+```sql
+CREATE STREAM appleTicker AS
+SELECT * FROM priceHistory WHERE symbol = 'AAPL'
+```
+
+```sql
+CREATE STREAM advertisementStream AS
+  SELECT * FROM clickStream C JOIN advertiserTable A
+    ON C.advertiserID = A.advertiserID
+```
+
+#### Inserting Data
+
+```sql
+INSERT
+  INTO temperatureStream (Location, temperature)
+  VALUES ('Ithaca', 32)
+```
+
+#### Query Types
+
+|                           |      **Push Query**     |              **Pull Query**             |
+|---------------------------|:-----------------------:|:---------------------------------------:|
+|      **Data Sources**     |      Table, Stream      |                  Table                  |
+| **Specific Restrictions** |            -            | Non-windowed aggregation: lookup by key |
+|       **Life Time**       | Keeps returning updates |            Returns one result           |
+
+### Streams Summary
+
+* Systems that analyze `data streams` in real time
+* Motivates extensions to the `SQL` query language
+* Need to keep `memory consumption` low
+* May use specialized `data structures` for fast inserts
+* `Distributed` stream processing required to scale
 
 ## Spatial Data
+
+### Types of Spatial Data
+
+* `Point data`
+  * Characterized completely by the location
+* `Region data`
+  * Defined by a boundary (like 2d lines or 3d surface topology)
+  * May have anchor location (centroid)
+
+### Types of Spatial Queries
+
+* `Spatial Range` queries
+  * Show me the restaurants in Ithaca
+* `Nearest Neighbour` queries
+  * Show me the nearest gas station
+* `Spatial Joins`
+  * Show hiking trails with parking within 100m
+
+### Outlook: Indexing
+
+There has been a lot of work done on explicitly indexing spatial data, as it happens to be that our standard indexes don't work very well for spatial data. Let's take a look at the following indexing methods we can apply to spatial data.
+
+* `B+ trees` for spatial data
+* Space-filling `curves`
+* `Region` quad tree
+* `Grid` files
+* The `R tree`
+
+#### The Problem with B+ Trees
+
+* `Close points` (in 2D) not close in index
+* Answering range queries etc. `inefficient`
+* Culd use one `tree per dimension` and merge RIDs
+  * But this leads to various overheads!
+
+#### Z-Ordering
+
+* `Numbers` each space coordinate
+* `Close points` have close numbers
+  * Not always, can avoid (Hilbert Curves)
+* `Binary` string representation for each coordinate: `00, 01, 10, 11, ...`
+  * (a<sub>1</sub>a<sub>2</sub>...a<sub>n</sub>, b<sub>1</sub>,b<sub>2</sub>...b<sub>n</sub>) for 2D
+* Z-Ordering assigns numbers a<sub>1</sub>b<sub>1</sub>a<sub>2</sub>b<sub>2</sub>...a<sub>n</sub>b<sub>n</sub>
+
+#### Indexing with Z-Ordering
+
+* Z-Ordering reduces multi-dimensional space to 1D
+* Can use standard index (B+ Tree) to index Z value
+* Translate XD range queries to 1D range queries
+  * May still require some additional filtering
 
 ## Querying Spatial Data
 
@@ -1560,7 +1696,7 @@ How does our data persist when the database operates in volatile memory?
 * Snapshotting -> Produces single-file point-in-time snapshtos of the dataset that gets dumped to disk.
 * Append Only File (AOF) -> Pushes all operations to a read-only file on disk in real-time.
 
-For persistance and durability the practice practice deployment strategy here is to place the AOF on separate storage. This means the Append-Only-File is accessed from block storage on another server, while the Redis service runs in RAM on its respective instances, and finally the snapshots get persisted on disk somewhere else allowing for more replication and fewer critical failure points.
+For persistance and durability the deployment strategy here is to place the AOF on separate storage. This means the Append-Only-File is accessed from block storage on another server, while the Redis service runs in RAM on its respective instances, and finally the snapshots get persisted on disk somewhere else allowing for more replication and fewer critical failure points.
 
 **Redis on Flash**
 
