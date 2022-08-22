@@ -160,7 +160,11 @@ Below are my study notes from an excellent lecture on Database Systems ([Part I:
       - [Grid Files](#grid-files)
       - [R Trees](#r-trees)
       - [R Trees: Lookups](#r-trees-lookups)
+      - [R Trees: Insertions](#r-trees-insertions)
   - [Querying Spatial Data](#querying-spatial-data)
+    - [Building Geography Value](#building-geography-value)
+    - [Calculating Boundaries](#calculating-boundaries)
+    - [Calculating Centroid](#calculating-centroid)
   - [NoSQL and NewSQL](#nosql-and-newsql)
   - [Errata](#errata)
     - [Popular Databases](#popular-databases)
@@ -1700,7 +1704,54 @@ There has been a lot of work done on explicitly indexing spatial data, as it hap
 * Check children `containing` query object
   * May need to check multiple children
 
+#### R Trees: Insertions
+
+* Compute the `bounding box` for inserted object
+* Start at the `root` node and proceed to lead nodes
+* Select a child needing `minimal extensions` for object
+* `Insert` object at lead node
+  * May have to `enlarge` bounding boxes on path to leaf
+  * May have to `rebalance` the tree
+
 ## Querying Spatial Data
+
+```bash
+ISO 19125-2:2004
+Geographic information
+Simple feature access
+Part 2: SQL Option
+https://www.iso.org/standard/40115.html
+```
+
+### Building Geography Value
+
+* Buil a new point with given coordinates
+
+```sql
+ST_GEOGPOINT(longitude, latitude)
+```
+
+* Connect to geography values by line
+
+```sql
+ST_MAKELINE(Geo_1, Geo_2)
+```
+
+### Calculating Boundaries
+
+* ST_BOUNDARY(geography expression)
+  * Returns the `union of boundaries` of given objects
+    * `Points` have no boundaries
+    * The boundaries of a `line` are the endpoints
+    * `Polygons` are bounded by lines
+
+### Calculating Centroid
+
+* ST_CENTROID(geography expression)
+* Returns the `weighted average` of compontent centroids
+  * Centroid of `point` coordinates is the arithmetic mean (average)
+  * Centroid of `line` segment is the middle point
+  * Centroid of a `polygon` is its center of mass
 
 ## NoSQL and NewSQL
 
