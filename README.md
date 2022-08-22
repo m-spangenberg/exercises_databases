@@ -156,6 +156,10 @@ Below are my study notes from an excellent lecture on Database Systems ([Part I:
       - [The Problem with B+ Trees](#the-problem-with-b-trees)
       - [Z-Ordering](#z-ordering)
       - [Indexing with Z-Ordering](#indexing-with-z-ordering)
+      - [Region Quad Tree](#region-quad-tree)
+      - [Grid Files](#grid-files)
+      - [R Trees](#r-trees)
+      - [R Trees: Lookups](#r-trees-lookups)
   - [Querying Spatial Data](#querying-spatial-data)
   - [NoSQL and NewSQL](#nosql-and-newsql)
   - [Errata](#errata)
@@ -1642,10 +1646,59 @@ There has been a lot of work done on explicitly indexing spatial data, as it hap
 
 #### Indexing with Z-Ordering
 
-* Z-Ordering reduces multi-dimensional space to 1D
-* Can use standard index (B+ Tree) to index Z value
-* Translate XD range queries to 1D range queries
+* Z-Ordering `reduces` multi-dimensional space to 1D
+* Can use `standard index` (B+ Tree) to index Z value
+* Translate XD `range queries` to 1D range queries
   * May still require some additional filtering
+
+#### Region Quad Tree
+
+* Z-Ordering enables us to store `points` efficiently
+* Storing entire `regions` as set of points is very inefficient
+* `Region quad trees` divide space `recursively`
+  * in 2D: each region is divided into four quadrants
+  * Quadrants are associated with child node trees
+* Possible drawback is that it is independant of the actual data structrure
+
+```bash
+11 ######################     ROOT -> R1  -> R11
+   #         #          #                 -> R12
+   #         #          #                 -> ...
+10 #         #          #          -> R2
+   #         #          #          -> ...
+   ######################
+   #    #    #          #
+   #    #    #          #
+01 ###########          #
+   #    #    #          #
+   #    #    #          #
+00 ######################
+   00    01      10    11
+```
+
+#### Grid Files
+
+* Region quad trees partition `independently` of data
+* This is not optimal if data is highly `skewed`
+* Grid files `adapt` space partitioning to data
+* More `fine-grained` representation for denser areas
+* See `book` for more details
+
+#### R Trees
+
+* Adaption of `B+ Trees` top handle spatial data
+* `Search key`: multi-dimensional bounding box
+* `Data entries`: bounding box, RID
+  * Box is smallest box to contain object
+* `Index entries`: bounding box, pointer to child
+
+#### R Trees: Lookups
+
+* Compute `bounding box` for query object
+  * Can be single point or region
+* Start at `root node` of R Tree
+* Check children `containing` query object
+  * May need to check multiple children
 
 ## Querying Spatial Data
 
