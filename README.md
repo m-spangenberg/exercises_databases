@@ -165,6 +165,10 @@ Below are my study notes from an excellent lecture on Database Systems ([Part I:
     - [Building Geography Value](#building-geography-value)
     - [Calculating Boundaries](#calculating-boundaries)
     - [Calculating Centroid](#calculating-centroid)
+    - [Access to Specific Properties](#access-to-specific-properties)
+    - [Predicate Expressions](#predicate-expressions)
+    - [Calculating Measurements](#calculating-measurements)
+    - [Spatial Data Summary](#spatial-data-summary)
   - [NoSQL and NewSQL](#nosql-and-newsql)
   - [Errata](#errata)
     - [Popular Databases](#popular-databases)
@@ -1721,6 +1725,9 @@ Geographic information
 Simple feature access
 Part 2: SQL Option
 https://www.iso.org/standard/40115.html
+
+Spatial Data Playground by Google
+https://bigquerygeoviz.appspot.com
 ```
 
 ### Building Geography Value
@@ -1747,11 +1754,35 @@ ST_MAKELINE(Geo_1, Geo_2)
 
 ### Calculating Centroid
 
-* ST_CENTROID(geography expression)
+* `ST_CENTROID(geography expression)`
 * Returns the `weighted average` of compontent centroids
   * Centroid of `point` coordinates is the arithmetic mean (average)
   * Centroid of `line` segment is the middle point
   * Centroid of a `polygon` is its center of mass
+
+### Access to Specific Properties
+
+* `ST_X(geography expression)` - returns the longitude
+* `ST_Y(geography expression)` - returns the latitude
+* `ST_DIMENSION(geography expression)` - returns dimension of highest-dimensional element
+
+### Predicate Expressions
+
+* `ST_CONTAINS(geo_1, geo_2)` - TRUE if geo_1 contains geo_2
+* `ST_DWITHIN(geo_1, geo_2, distance)` - TRUE if distance of at least one point from geo_1 and geo_2 is that distance in metres
+
+### Calculating Measurements
+
+* `ST_AREA(geography expression)` - Calculates the covered area in square meters
+* `ST_MAXDISTANCE(geo_1, geo_2)` - Longest distance between any two points in meters
+
+### Spatial Data Summary
+
+* Various applications require `spatial data`
+* Standard `data structures` are a bad match
+  * Saw specialized data structures like `R Trees`
+* SQL query languages require `extensions`
+  * Saw extensions supported by `BigQuery Geo Viz`
 
 ## NoSQL and NewSQL
 
