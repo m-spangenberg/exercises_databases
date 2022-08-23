@@ -170,6 +170,12 @@ Below are my study notes from an excellent lecture on Database Systems ([Part I:
     - [Calculating Measurements](#calculating-measurements)
     - [Spatial Data Summary](#spatial-data-summary)
   - [NoSQL and NewSQL](#nosql-and-newsql)
+    - [Consistency vs. Availability](#consistency-vs-availability)
+    - [CAP Theorem](#cap-theorem)
+    - [Evential Consistency](#evential-consistency)
+    - [BASE Transactions](#base-transactions)
+    - [NoSQL](#nosql)
+    - [Apache Cassandra](#apache-cassandra)
   - [Errata](#errata)
     - [Popular Databases](#popular-databases)
       - [PostGreSQL](#postgresql)
@@ -1785,6 +1791,62 @@ ST_MAKELINE(Geo_1, Geo_2)
   * Saw extensions supported by `BigQuery Geo Viz`
 
 ## NoSQL and NewSQL
+
+To avoid confusion: In the following we will discuss systems that deal with `eventual consistency`. So far consistency has meant we have a database that satisfies all contrains related to ACID transactions. In the context of the following systems, consistency means all replicas appear in `sync`, this is terminology from the `distributed systems` community.
+
+### Consistency vs. Availability
+
+So, let's discuss the trade-off between distributed systems. So far we've discussed consistency, in the sense that different copies apear to be in sync and in the following examples we will see that shows consistency can somtimes conflict with availability (the abillity of a system to answer requests).
+
+Example: We have an online shop with multiple (2) sites to serve geopgraphically disparate customers more efficiently. Each of these sites has a copy of the inventory of items we sell. These sites need to communicate with each other in order to maintain the sync of our inventories. Now let us assume that a network failure occurs, in other words the network becomes partitioned, now different parts of our system cannot communicate with each other. Now, a customer comes to our store to buy somthing. We can handle this in two ways: One possibility is we handle the request and sell an item to the client, but now our inventory is reduced in one shop, and the other site's inventory is unaware of this transaction - of course this leads to inconsistent states between the two nodes. The other possibillity is that we tell the customer we can't help them becuase our system is down, and we'll help them once we have reached quorum again, and there is a small likelyhood that we possibly lose the sale.
+
+### CAP Theorem
+
+Let's imagine a CAP theorom Venn diagram displays three overlapping traits;  Consistency, Availability, and Partition Tolerance. CAP Theorem claims that there is intrinsic trade-off between all three these traits. We ideally would want a system that exists at the overlap of all three traits, but this overlap is not possible, so we are left with compromise.
+
+* Consistency - All clients see the same view of data, even right after updates or deletes
+* Availability - All clients can find a replica of data, even in cases of partial node failure
+* Partitioning - The system continues to work as expected, even in presence of partial network failure
+
+At the overlap of these traits, we find specialized database systems the fall into the following catagories.
+
+* Consistency + Availability -> msSQL, IBM DB2, Oracle, MySQL, MariaDB, PostgreSQL
+* Consistency + Partition-Tolerance -> Redis, Memcache, MongoDB, Apache HBASE, CockroachDB
+* Availability + Partition-Tolerance -> Cassandra, CouchDB, Amazon SimpleDB, Amazon DynamoDB, RiakDB
+
+Traditional DBMS prioritze strict consistency, therefore they fall into the Consistency and Partition Tolerance overlap, Distributed NoSQL systems fall into the Availability and Partition-Tolerance overlap and aim to be `eventually consistent`, which is what we will be discussing going forward. Services like Azure's CosmosDB attempt to [straddle](https://docs.microsoft.com/en-us/azure/cosmos-db/consistency-levels) these consistency levels by having tunable consitency levels -- see: an extension to CAP Theorem called [PACELC Theorem](https://en.wikipedia.org/wiki/PACELC_theorem).
+
+### Evential Consistency
+
+* Traditional DBMS choose `consistency` over availability
+* This is `not ideal` in scenarios such as online shopping (who gets an items sold twice?)
+* Here, we want to be `available` at all costs
+* Need to accept `inconsistency` according to CAP
+* This inconsistency is `resolved eventually`
+
+### BASE Transactions
+
+BASE stands for **B**asically **A**vailable **S**oft State **E**ventually Consistent, which differs from ACID in that we priotize being available above everything else, we don't require our data to be strictly consistent, but it will eventually converge to a consistent state when the system can do so.
+
+### NoSQL
+
+* Systems that `move away` from traditional SQL DBMS
+* `Broad` term covering many aspects such as
+  * Reduced `consistency` (BASE)
+  * Non-SQL query `languages`
+  * Non-relational `data models`
+  * ...
+
+### Apache Cassandra
+
+* Distributed system, every node has the `same role`, no single point of failure
+* `Wide column` store - rows have different columns, looks like tables, more flexible
+* Supports `CQL`, simpler than SQL (eg: has no joins)
+* Supports replication for `fault tolerance`
+* Goal: `scale linearly` when adding new nodes
+* Eventually consistent with `tunable consistency`
+
+
 
 ## Errata
 
