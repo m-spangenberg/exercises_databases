@@ -1,6 +1,9 @@
 # Ignore all folders called data inside the project structure
 */data/
 
+# Ignore VSCode generated config files
+.vscode
+
 # Ignore files of format
 *.csv
 *.zip

@@ -172,7 +172,7 @@ Below are my study notes from an excellent lecture on Database Systems ([Part I:
   - [NoSQL and NewSQL](#nosql-and-newsql)
     - [Consistency vs. Availability](#consistency-vs-availability)
     - [CAP Theorem](#cap-theorem)
-    - [Evential Consistency](#evential-consistency)
+    - [Eventual Consistency](#eventual-consistency)
     - [BASE Transactions](#base-transactions)
     - [NoSQL](#nosql)
     - [Apache Cassandra](#apache-cassandra)
@@ -198,7 +198,7 @@ To interface with the DBMS we must use SQL to issue queries. These queries, or c
 * Data Control Language (**DCL**) -> exists to assign access rights to data
 * Transaction Control Language (**TCL**) -> groups  SQL commands as transactions
 * Data Manipulation Language (**DML**) -> insert, manipulate, and retrieve data
-* Data Definition Language (**DDL**) -> defines what is admissable data within set constraints
+* Data Definition Language (**DDL**) -> defines what is admissible data within set constraints
 
 ```bash
 # fully specified
@@ -236,7 +236,7 @@ CREATE TABLE <table> (<table-def>)
 
 ### Integrity Constraints
 
-Above we have created three tables. Each column has a name, a key if you will, and a datatype associated with that column. The datatype is what is called an `Integrity Constraint`, as the DBMS enforces what types of data are permissable for each column ensuring the integrity of the model.
+Above we have created three tables. Each column has a name, a key if you will, and a datatype associated with that column. The datatype is what is called an `Integrity Constraint`, as the DBMS enforces what types of data are permissible for each column ensuring the integrity of the model.
 
 ### Primary Key Constraints
 
@@ -548,7 +548,7 @@ We need to be able to partition pages into sections that store different rows. T
 
 ### Fixed-Length Records
 
-Data types like integers can be determined **a-priori** due to the fixed quantity of bytes (4) needed to create one unit of said datatype. This means it is much easier to work with fixed-length data types, which can be uniformly partitioned into set sized records, as opposed to text strings, which are variable, and therefore not determinable a-priori. We must still keep track of how these slots are used (**insertions**), this is achieved with **packed representation**, or **unpacked representation**. Packed representation uses consecutive slots and only keeps track of number of slots used, whereas the unpacked method allows unused slots in-between used slots, but needs a bitmap to keep track of used slots. A potential issue with packed representation is that removing a slot (**deletion**) leaves a hole, which has to be filled, which effects the slotID, meaning we would have to update any external references.
+Data types like integers can be determined **apriori** due to the fixed quantity of bytes (4) needed to create one unit of said datatype. This means it is much easier to work with fixed-length data types, which can be uniformly partitioned into set sized records, as opposed to text strings, which are variable, and therefore not determinable a-priori. We must still keep track of how these slots are used (**insertions**), this is achieved with **packed representation**, or **unpacked representation**. Packed representation uses consecutive slots and only keeps track of number of slots used, whereas the unpacked method allows unused slots in-between used slots, but needs a bitmap to keep track of used slots. A potential issue with packed representation is that removing a slot (**deletion**) leaves a hole, which has to be filled, which effects the slotID, meaning we would have to update any external references.
 
 ### Variable-Length Records
 
@@ -572,7 +572,7 @@ Let's say we have an enrollment table that contains information about students a
 ****
 ### Indexes
 
-The way we can solve the above problem is to use an index. An **index** is an auxillary data structure for finding data faster, exactly like the index in a book. We can have multiple indexes for the same table, one can be for info on specific students, and another for specific courses.
+The way we can solve the above problem is to use an index. An **index** is an auxiliary data structure for finding data faster, exactly like the index in a book. We can have multiple indexes for the same table, one can be for info on specific students, and another for specific courses.
 
 ### How It Works
 
@@ -600,7 +600,7 @@ When searching for entries with, for instance **key value** `V`, we start at **r
 
 ### Linking Leaf Nodes
 
-Often we want to retrieve entries from **neighbouring** leaf nodes, in this case it would be good for performance if these leaf nodes are linked in some way where we can get node references from **parent nodes**. In this case we can **store pointers** to next and previous neighbours in the leaf page, these leaf pages essentially become **doubly linked lists**.
+Often we want to retrieve entries from **neighboring** leaf nodes, in this case it would be good for performance if these leaf nodes are linked in some way where we can get node references from **parent nodes**. In this case we can **store pointers** to next and previous neighbors in the leaf page, these leaf pages essentially become **doubly linked lists**.
 
 https://youtu.be/4cWkVbC2bNE?t=15496
 
@@ -887,7 +887,7 @@ It is ultimately our goal to transform our conceptual database into a normal for
 
 When working through Normal Forms, we notice that they impose conditions on functional dependencies in **single tables**. To satisfy the conditions, we must **decompose** tables into smaller tables. This process of decomposition must allow us to **reconstruct** the original data.
 
-Let's assume we decompose `R into X and Y`, We can do so if `X subset of Y implies X` or `X subset of Y implies Y` is a functional dependency. We can then match each row from Y to one row from X or each frow from X to one row from Y. If we are able to do this, it means our decomposition was lossless.
+Let's assume we decompose `R into X and Y`, We can do so if `X subset of Y implies X` or `X subset of Y implies Y` is a functional dependency. We can then match each row from Y to one row from X or each row from X to one row from Y. If we are able to do this, it means our decomposition was lossless.
 
 Example: Lossless Decomposition - Table A (Constraint: Hours implies Salary)
 
@@ -909,13 +909,13 @@ Example: Lossless Decomposition - Table B (Constraint: Hours implies Salary)
 
 #### Towards Boyce-Codd Normal Form (BCNF)
 
-The algorithm concerning BCNF is relatively straighforward.
+The algorithm concerning BCNF is relatively straightforward.
 
 * **Repeat** while some FD `A implies b on R` violates BCNF rules
   * **Decompose** R into R-b and Ab
-* All Decompositions are **lossless** as `(R-b) instersection of Ab=A implies b`
+* All Decompositions are **loss-less** as `(R-b) intersection of Ab=A implies b`
 * **Terminates** as tables get smaller and smaller
-* End result may **depend** on decompositon order
+* End result may **depend** on decomposition order
 
 Example:
 
@@ -931,11 +931,11 @@ Final database schema: SDP, JS, CJDQV
 
 #### Dependency Preservation
 
-One thing that BCNF cannot gaurantee is that we preserve all dependencies. In general we assume we **decompose** a relation R into X and Y, now assume we **enforce** FDs on X and Y separately, in other words, we verify all FDs that only use attributes from X then we verify all FDs using attributes from only Y. We have implicitly enforced all FDs on R if **dependency preserving**. It is reasonable to say that dependency preservation is at odds with trying to decompose things as much as neccesary in order to avoid redundancy.
+One thing that BCNF cannot gaurantee is that we preserve all dependencies. In general we assume we **decompose** a relation R into X and Y, now assume we **enforce** FDs on X and Y separately, in other words, we verify all FDs that only use attributes from X then we verify all FDs using attributes from only Y. We have implicitly enforced all FDs on R if **dependency preserving**. It is reasonable to say that dependency preservation is at odds with trying to decompose things as much as necessary in order to avoid redundancy.
 
 #### Towards Third Normal Form (3NF)
 
-For third normal form, we essentially do something similar to BCNF, the only diference being to preserve dependencies we create new **extensions** to relations. If we have dependency `A implies b` and this is **broken** by decomposition, we then add relation `Ab`. In order to make this work, we must use something called **minimal cover** functional dependencies.
+For third normal form, we essentially do something similar to BCNF, the only difference being to preserve dependencies we create new **extensions** to relations. If we have dependency `A implies b` and this is **broken** by decomposition, we then add relation `Ab`. In order to make this work, we must use something called **minimal cover** functional dependencies.
 
 * on the right hand side of the functional dependency we have a **single attribute**
 * closure changes when **deleting and functional dependency**
@@ -965,7 +965,7 @@ CREATE TABLE Connected(
 );
 ```
 
-Now, we perhaps want to query this database for all possible connections, or in this case routes from one place ("Port Authority") to another ("NYU"). To search paths which have multpile steps to them with a standard SQL query, we might have to chain multiple self-joins in order to keep reference to the the first connected station through to the destination station, as is shown in the below SQL template. This is fine for retrieving paths with a fixed length, but is not the most ellegant way to solve this problem, and could probably be solved better with more advanced SQL features.
+Now, we perhaps want to query this database for all possible connections, or in this case routes from one place ("Port Authority") to another ("NYU"). To search paths which have multiple steps to them with a standard SQL query, we might have to chain multiple self-joins in order to keep reference to the the first connected station through to the destination station, as is shown in the below SQL template. This is fine for retrieving paths with a fixed length, but is not the most ellegant way to solve this problem, and could probably be solved better with more advanced SQL features.
 
 ```sql
 SELECT * from Connected C1
@@ -1031,7 +1031,7 @@ CREATE (a)-[:Enrolled {semester: 'FS20'}]->(b)
 
   * Matches `a` to students with name "Marc"
   * Matches `b` to courses with name "CS4320"
-  * Inserts egde from `a` to `b` with label "Enrolled"
+  * Inserts edge from `a` to `b` with label "Enrolled"
   * Edge has property "semester" set to "FS20"
 
 note: notice the '->' use of the arrow, this denotes an edge that points FROM node a TO node b. When creating edges we must always define directions.
@@ -1077,7 +1077,7 @@ MATCH (a:Student {name: 'Marc'})
 SET e.semester = 'FS21'
 ```
 
-* Get edge representing enrollement of Marc in CS4320
+* Get edge representing enrollment of Marc in CS4320
 * Update value of semester property to "FS21"
 
 #### Deletions
@@ -1132,7 +1132,7 @@ MATCH (:Student {name: 'Marc'})
 RETURN s
 ```
 
-To vary depth, in other words, to recursively search or chain relationsin order to search for the friends of their friends, and so on.
+To vary depth, in other words, to recursively search or chain relationship order to search for the friends of their friends, and so on.
 
 * '*0..2' in this context would chain a search between 0 and 2 connections, or in other words all the students that can be reached in at most two steps: Marc, his friends, and the friends of his friends. Essentially, between the first node and second node, we can have up to two edges. With zero edges it refers to the node itself.
 
@@ -1144,7 +1144,7 @@ RETURN s
 
 #### Aggregation
 
-We can also aggregate the number of occurances of a pattern using the count clause, as in SQL.
+We can also aggregate the number of occurrences of a pattern using the count clause, as in SQL.
 
 ```sql
 MATCH (:Student {name: 'Marc'})
@@ -1174,7 +1174,7 @@ MATCH (c1:Course {name: 'CS4320'})
 RETURN c2
 ```
 
-Going back to the initial question of trainstations in New York, we can now see that we can return a path of arbitrary length showing the connections between two stations with a much more concise query than we could with vanilla SQL.
+Going back to the initial question of train stations in New York, we can now see that we can return a path of arbitrary length showing the connections between two stations with a much more concise query than we could with vanilla SQL.
 
 ```sql
 MATCH (s1:Station) -[]:Connected*- (s2:Station)
@@ -1185,7 +1185,7 @@ RETURN *
 
 The Neo4j system uses a specialized data layout which makes it especially useful for traversing graphs. It uses one data loayout which it uses to store data on hard disk and another to store data in memory.
 
-* In-Memory data layour is optimized for `fast traversal`
+* In-Memory data layout is optimized for `fast traversal`
 * `Nodes` stored with labels, properties, and edge references
   * Nodes store list of incoming and outgoing edges
 * `Edges` stored with label, properties, and node references
@@ -1197,7 +1197,7 @@ When a query is processed by Neo4j, it is translated into a query plan.
 * Query plans composed from `standard operators`
   * Most known from SQL: filtering, projection, ...
   * A few graph-specific operators (eg: shortest path)
-* Can use `indices` to retrieve specfic nodes/edges
+* Can use `indices` to retrieve specific nodes/edges
 * Query plans are selected via cost-based `optimization`
 
 ### Transaction Processing
@@ -1205,8 +1205,8 @@ When a query is processed by Neo4j, it is translated into a query plan.
 We can also process transactions. Read-commited isolation is an isolation level also present in SQL, which means we can only see the values which have been written by commited-transaction.
 
 * Neo4j supports `read-committed` isolation by default
-* Aquire locks manually to achieve a `higher isolation` level
-* Uses logging to persistant storage to achieve `durability`
+* Acquire locks manually to achieve a `higher isolation` level
+* Uses logging to persistent storage to achieve `durability`
 * Overall: can support `ACID`
 
 ## Distributed Graph Processing
@@ -1243,7 +1243,7 @@ Calculating PageRank
 * We initialize each node's PageRank to `1/NumberNodes` <- uniform random distribution
 * In each iteration, we `redistribite` PageRank over links <- iterate until convergence
   * Each node partitions PageRank among outgoing links
-  * PageRank in next iteration is sum over incomming links
+  * PageRank in next iteration is sum over incoming links
 
 Pregel Overview
 
@@ -1266,11 +1266,11 @@ In this approach a `coordinator` optimizes partitioning to nodes with the highes
   Worker 1 -> Graph Partition 1 -> Nodes {...}
   Workier 2 -> Graph Partition 2 -> Nodes {...}
 
-Fault Tollerance
+Fault Tolerance
 
 *  Check pointing with workers `persisting` input and state at iteration start
 *  Coordinator `detects` worker failures via pings
-   *  `Recovery` may start serveral supersteps earlier
+   *  `Recovery` may start several supersteps earlier
    *  `Re-partition` graph to replace failed workers
 * `Confined recovery` restricted to failed partitions <- more refined mechanism with higher logging
   * Requires persisting outgoing messages as well
@@ -1281,8 +1281,8 @@ note: this example does not consider random jumps and dead-ends
 
 ```bash
 # Implement the compute function, which will be invoked for each node and each iteration
-Compute(ReceivedPR : int[])  # Incomming messages correspond to packages of page rank value
-  NewPR = sum(ReceivedPR)  # Calculate our new page rank value by summing up all the recieved page rank values
+Compute(ReceivedPR : int[])  # Incoming messages correspond to packages of page rank value
+  NewPR = sum(ReceivedPR)  # Calculate our new page rank value by summing up all the received page rank values
   For o in OutgoingLinks:  # Iterate over outgoing links
     Send(o.target, NewPR/|OutgoingLinks|)  # Send new values to outgoing links
 ```
@@ -1297,7 +1297,7 @@ Better Performance with Combiners
 
 Data streams are never ending sources of new data which we might want to observe patterns in.
 
-* Data is contantly being generated
+* Data is constantly being generated
   * Stock market ticker
   * Network monitoring
   * Sensors
@@ -1320,7 +1320,7 @@ The traditional method of ingesting data has been to use an extract-transform-lo
 
 ### Stream Data Management Systems
 
-If we compare stream data management systems to database management systems, DBMS assume relatively static datasets, and the other assumes datasets are constantly changing, meaning our query result will keep changinh but the result can be observed so we keep running that query for long periods of time to extract meaning from changing the data.
+If we compare stream data management systems to database management systems, DBMS assume relatively static datasets, and the other assumes datasets are constantly changing, meaning our query result will keep changing but the result can be observed so we keep running that query for long periods of time to extract meaning from changing the data.
 
 |         | Database Management | Stream Data Management |
 | ------- | ------------------- | ---------------------- |
@@ -1352,7 +1352,7 @@ Can be generally classified as:
 
 * Relation R(t) is specified as a `window` over stream S
 * Tuple-based sliding window: `S [Rows N]`
-  * R(t) contains N tuples freomS with highet timestamps
+  * R(t) contains N tuples from S with highest time stamps
 * TIme-based sliding window `S [Range T]`
   * R(t) contains tuples from S starting from Now() - T
 * Partitioned sliding window: `S [Partition by A1, A2 ... Rows N]`
@@ -1383,7 +1383,7 @@ SELECT * FROM Customer C
   ON (C.customerKey = O.customerKey)
 ```
 
-* Show a stream of tuples and insertion timestamps of clicks on advertisements over the last 30 seconds.
+* Show a stream of tuples and insertion time stamps of clicks on advertisements over the last 30 seconds.
 
 ```sql
 SELECT Istream() FROM (
@@ -1395,7 +1395,7 @@ SELECT Istream() FROM (
 ### Query Processing
 
 * Input query is compile into continuous `query plan`
-* Query plan is compsoed from `standed operators`
+* Query plan is compsoed from `standard operators`
 * Operators exchange tuple `additions` and `deletions`
   * `Streams` produce only tuple additions
   * `Relations` produce additions and delettions
@@ -1423,18 +1423,18 @@ SELECT * FROM S1 [Row 1,000], S2 [Range 2 Minutes]
 
 ### Adaptive Query Planning
 
-As properties can change over time in data streams, we might need to adapt to changes and process our streams differently. In Adaptive Query Planning means we start with one query point, but as time progresses and the data stream changes, our query adapts and re-optimizes. To achieve this, we have the Executor, the Profiler and the Re-Optimizer. The executor is the execution engines that executes our query plans, the re-optimizer revises our query plans, and the profiler is a component that generates statistic that are used by the re-optimizer for planning. The re-optimizer can also request specific statistic from the profiler. These three components revise the planning deciisions over time based on the data properties we observe. The most important decision is Join Order, Caching, and specific Constraints.
+As properties can change over time in data streams, we might need to adapt to changes and process our streams differently. In Adaptive Query Planning means we start with one query point, but as time progresses and the data stream changes, our query adapts and re-optimizes. To achieve this, we have the Executor, the Profiler and the Re-Optimizer. The executor is the execution engines that executes our query plans, the re-optimizer revises our query plans, and the profiler is a component that generates statistic that are used by the re-optimizer for planning. The re-optimizer can also request specific statistic from the profiler. These three components revise the planning decisions over time based on the data properties we observe. The most important decision is Join Order, Caching, and specific Constraints.
 
 ### Minimizing Space Requirements
 
 * Very important for streams (`unbounded` size)
 * Eliminate redundant data via `synopsis sharing`
-* `Exploit constraints` to prine unnecessary data
+* `Exploit constraints` to prune unnecessary data
 * Shrink intermediate results via `optimized scheduling`
 
 #### Synopsis Sharing
 
-The synpopsis is the state which needs to be maintained by operators in your query plan.
+The synopsis is the state which needs to be maintained by operators in your query plan.
 
 * Synopsis of operators in same plan often `overlap`
 * Storing synopses separately means `redundancy`
@@ -1449,7 +1449,7 @@ SELECT * FROM Orders [Rows Unbounded] O
   ON (O.orderID = F.orderID)
 ```
 
-This example above requires unbounded (infinite) synopses without contraints. This is wasteful and to be avoided at all costs! Let's make some assumptions. Assumption 1: Orders arrive before fullfillments and Assumption 2: Fullfillments clustered by orderID. We can use these constraints to reduce the size of a potentially unbounded hash-table as follows: When an order arrives, we can delete the fullfillment which refers to previous orders and we could only store the orders and ignore the fullfillment. We can simplify even more by discarding/pruning entries associated with orderID's once they are processed, because the orders are clustered.
+This example above requires unbounded (infinite) synopses without constraints. This is wasteful and to be avoided at all costs! Let's make some assumptions. Assumption 1: Orders arrive before fulfillment and Assumption 2: Fulfillment clustered by orderID. We can use these constraints to reduce the size of a potentially unbounded hash-table as follows: When an order arrives, we can delete the fulfillment which refers to previous orders and we could only store the orders and ignore the fulfillment. We can simplify even more by discarding/pruning entries associated with orderID's once they are processed, because the orders are clustered.
 
 ### Constraint Types
 
@@ -1458,10 +1458,10 @@ This example above requires unbounded (infinite) synopses without contraints. Th
   * Delay at most k between matching tuples arriving
 * `Ordered-arrivals` k-constraint
   * Stream elements at least k tuples apart are sorted
-* `Clustered-arrival` k-contraint
+* `Clustered-arrival` k-constraint
   * Elements with same key can be at most k tuples apart
 
-note: we can exploit each constraint for dropping tuples in certain scenarious
+note: we can exploit each constraint for dropping tuples in certain scenarios
 
 ### Scheduling Policy
 
@@ -1511,13 +1511,13 @@ Input Queue --> Operator 1 (Selectivity: Filter 20%) --> Intermediate Result Que
 * `Producers` append to this log - no updates/deletes
 * `Consumers` receive updates for topics they subscribed to
 * `Regular` topic: delete tuples by space/time constraint
-* `Compacted` topic: new tuples overide old keys
+* `Compacted` topic: new tuples override old keys
 
 #### Distributed Processing
 
 * Each topic is divided into `partitions`
 * Partitions are `replicated` across servers
-  * `Fault tollerance` by redundancy
+  * `Fault tolerance` by redundancy
   * Allows to `scale` to more consumers
 * Each partition has one dedicated `leader`
   * Leader accepts topics `updates`
@@ -1555,7 +1555,7 @@ Input Queue --> Operator 1 (Selectivity: Filter 20%) --> Intermediate Result Que
 * `Bloom filters` reduce the number of levels to consider
   * We have seen Bloom filters for distributed joins
   * Bloom filter captures non-empty hash buckets
-  * Used to summarizse keys present at each level
+  * Used to summarize keys present at each level
 
 ### ksqlDB
 
@@ -1630,7 +1630,7 @@ INSERT
 
 * `Spatial Range` queries
   * Show me the restaurants in Ithaca
-* `Nearest Neighbour` queries
+* `Nearest Neighbor` queries
   * Show me the nearest gas station
 * `Spatial Joins`
   * Show hiking trails with parking within 100m
@@ -1675,7 +1675,7 @@ There has been a lot of work done on explicitly indexing spatial data, as it hap
 * `Region quad trees` divide space `recursively`
   * in 2D: each region is divided into four quadrants
   * Quadrants are associated with child node trees
-* Possible drawback is that it is independant of the actual data structrure
+* Possible drawback is that it is independent of the actual data structure
 
 ```bash
 11 ######################     ROOT -> R1  -> R11
@@ -1764,7 +1764,7 @@ ST_MAKELINE(Geo_1, Geo_2)
 ### Calculating Centroid
 
 * `ST_CENTROID(geography expression)`
-* Returns the `weighted average` of compontent centroids
+* Returns the `weighted average` of component centroids
   * Centroid of `point` coordinates is the arithmetic mean (average)
   * Centroid of `line` segment is the middle point
   * Centroid of a `polygon` is its center of mass
@@ -1795,31 +1795,31 @@ ST_MAKELINE(Geo_1, Geo_2)
 
 ## NoSQL and NewSQL
 
-To avoid confusion: In the following we will discuss systems that deal with `eventual consistency`. So far consistency has meant we have a database that satisfies all contrains related to ACID transactions. In the context of the following systems, consistency means all replicas appear in `sync`, this is terminology from the `distributed systems` community.
+To avoid confusion: In the following we will discuss systems that deal with `eventual consistency`. So far consistency has meant we have a database that satisfies all constraints related to ACID transactions. In the context of the following systems, consistency means all replicas appear in `sync`, this is terminology from the `distributed systems` community.
 
 ### Consistency vs. Availability
 
-So, let's discuss the trade-off between distributed systems. So far we've discussed consistency, in the sense that different copies apear to be in sync and in the following examples we will see that shows consistency can somtimes conflict with availability (the abillity of a system to answer requests).
+So, let's discuss the trade-off between distributed systems. So far we've discussed consistency, in the sense that different copies appear to be in sync and in the following examples we will see that shows consistency can sometimes conflict with availability (the ability of a system to answer requests).
 
-Example: We have an online shop with multiple (2) sites to serve geopgraphically disparate customers more efficiently. Each of these sites has a copy of the inventory of items we sell. These sites need to communicate with each other in order to maintain the sync of our inventories. Now let us assume that a network failure occurs, in other words the network becomes partitioned, now different parts of our system cannot communicate with each other. Now, a customer comes to our store to buy somthing. We can handle this in two ways: One possibility is we handle the request and sell an item to the client, but now our inventory is reduced in one shop, and the other site's inventory is unaware of this transaction - of course this leads to inconsistent states between the two nodes. The other possibillity is that we tell the customer we can't help them becuase our system is down, and we'll help them once we have reached quorum again, and there is a small likelyhood that we possibly lose the sale.
+Example: We have an online shop with multiple (2) sites to serve geographically disparate customers more efficiently. Each of these sites has a copy of the inventory of items we sell. These sites need to communicate with each other in order to maintain the sync of our inventories. Now let us assume that a network failure occurs, in other words the network becomes partitioned, now different parts of our system cannot communicate with each other. Now, a customer comes to our store to buy something. We can handle this in two ways: One possibility is we handle the request and sell an item to the client, but now our inventory is reduced in one shop, and the other site's inventory is unaware of this transaction - of course this leads to inconsistent states between the two nodes. The other possibility is that we tell the customer we can't help them because our system is down, and we'll help them once we have reached quorum again, and there is a small likelihood that we possibly lose the sale.
 
 ### CAP Theorem
 
-Let's imagine a CAP theorom Venn diagram displays three overlapping traits;  Consistency, Availability, and Partition Tolerance. CAP Theorem claims that there is intrinsic trade-off between all three these traits. We ideally would want a system that exists at the overlap of all three traits, but this overlap is not possible, so we are left with compromise.
+Let's imagine a CAP theorem Venn diagram displays three overlapping traits;  Consistency, Availability, and Partition Tolerance. CAP Theorem claims that there is intrinsic trade-off between all three these traits. We ideally would want a system that exists at the overlap of all three traits, but this overlap is not possible, so we are left with compromise.
 
 * Consistency - All clients see the same view of data, even right after updates or deletes
 * Availability - All clients can find a replica of data, even in cases of partial node failure
 * Partitioning - The system continues to work as expected, even in presence of partial network failure
 
-At the overlap of these traits, we find specialized database systems the fall into the following catagories.
+At the overlap of these traits, we find specialized database systems the fall into the following categories.
 
 * Consistency + Availability -> msSQL, IBM DB2, Oracle, MySQL, MariaDB, PostgreSQL
 * Consistency + Partition-Tolerance -> Redis, Memcache, MongoDB, Apache HBASE, CockroachDB
 * Availability + Partition-Tolerance -> Cassandra, CouchDB, Amazon SimpleDB, Amazon DynamoDB, RiakDB
 
-Traditional DBMS prioritze strict consistency, therefore they fall into the Consistency and Partition Tolerance overlap, Distributed NoSQL systems fall into the Availability and Partition-Tolerance overlap and aim to be `eventually consistent`, which is what we will be discussing going forward. Services like Azure's CosmosDB attempt to [straddle](https://docs.microsoft.com/en-us/azure/cosmos-db/consistency-levels) these consistency levels by having tunable consitency levels -- see: an extension to CAP Theorem called [PACELC Theorem](https://en.wikipedia.org/wiki/PACELC_theorem).
+Traditional DBMS prioritize strict consistency, therefore they fall into the Consistency and Partition Tolerance overlap, Distributed NoSQL systems fall into the Availability and Partition-Tolerance overlap and aim to be `eventually consistent`, which is what we will be discussing going forward. Services like Azure's CosmosDB attempt to [straddle](https://docs.microsoft.com/en-us/azure/cosmos-db/consistency-levels) these consistency levels by having tunable consistency levels -- see: an extension to CAP Theorem called [PACELC Theorem](https://en.wikipedia.org/wiki/PACELC_theorem).
 
-### Evential Consistency
+### Eventual Consistency
 
 * Traditional DBMS choose `consistency` over availability
 * This is `not ideal` in scenarios such as online shopping (who gets an items sold twice?)
@@ -1829,7 +1829,7 @@ Traditional DBMS prioritze strict consistency, therefore they fall into the Cons
 
 ### BASE Transactions
 
-BASE stands for **B**asically **A**vailable **S**oft State **E**ventually Consistent, which differs from ACID in that we priotize being available above everything else, we don't require our data to be strictly consistent, but it will eventually converge to a consistent state when the system can do so.
+BASE stands for **B**asically **A**vailable **S**oft State **E**ventually Consistent, which differs from ACID in that we prioritize being available above everything else, we don't require our data to be strictly consistent, but it will eventually converge to a consistent state when the system can do so.
 
 ### NoSQL
 
@@ -1870,12 +1870,12 @@ This brings us to a new wave of systems refered to as NewSQL.
 #### H-Store: Observations
 
 * Modern Transaction Workloads
-  * Short running transactions compared to legacy workloads <- Serial Execution for single site Txs prefered
+  * Short running transactions compared to legacy workloads <- Serial Execution for single site Txs preferred
   * No user input needed, highly automated
   * Transactions - templates laid out in advance <- Exploit pre-processing and pooling
 * Modern Hardware
   * Main memory used to be very expensive, now the entire DB can fit in main memory <- Main memory DBMS
-  * Distributed systems are much more common, and prefered more often than not <- Replication for fault tolereance
+  * Distributed systems are much more common, and preferred more often than not <- Replication for fault tolerance
 
 ## Errata
 
@@ -1926,7 +1926,7 @@ For persistance and durability the deployment strategy here is to place the AOF 
 
 **Redis on Flash**
 
-Where the standard Redis model is to have everything in RAM, Redis offers `enterprise functionality` called Redis on Flash, which as the name suggest, stores 'Hot' values, which are frequently accesed in RAM, and less frequently or 'Warm' values are stores on flash storage in order to maximize capacity and save on infrastructure costs.
+Where the standard Redis model is to have everything in RAM, Redis offers `enterprise functionality` called Redis on Flash, which as the name suggest, stores 'Hot' values, which are frequently accessed in RAM, and less frequently or 'Warm' values are stores on flash storage in order to maximize capacity and save on infrastructure costs.
 
 **Scaling Redis**
 
