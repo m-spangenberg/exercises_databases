@@ -176,6 +176,9 @@ Below are my study notes from an excellent lecture on Database Systems ([Part I:
     - [BASE Transactions](#base-transactions)
     - [NoSQL](#nosql)
     - [Apache Cassandra](#apache-cassandra)
+    - [CAP Criticism](#cap-criticism)
+    - [NewSQL](#newsql)
+      - [H-Store: Observations](#h-store-observations)
   - [Errata](#errata)
     - [Popular Databases](#popular-databases)
       - [PostGreSQL](#postgresql)
@@ -578,7 +581,7 @@ Indexes store **references** to data records, this means they store **page** IDs
 Example: Index by Student Name
 
 | page 14       | page 15        | page 16        | page 17         | page 18       |
-|---------------|----------------|----------------|-----------------|---------------|
+| ------------- | -------------- | -------------- | --------------- | ------------- |
 | [Alan][P22,3] | [Felix][P77,3] | [Chen][P15,1]  | [Mia][P25,1]    | [Jose][P44,3] |
 | [Bob][P42,1]  | [John][P31,1]  | [Frank][P28,3] | [Sergei][P27,3] | [Rosa][P11,1] |
 | [Alec][P69,1] | [Harry][P21,3] | [Ida][P53,3]   | [Victor][P58,1] | [Gert][P45,3] |
@@ -714,7 +717,7 @@ We use FD to detect data redundancies, these redundancies are data we want to re
 Example: A Functional Dependance `Hours --> Salary`
 
 | TA Name | Hours     | Salary |
-|---------|-----------|--------|
+| ------- | --------- | ------ |
 | John    | Full Time | 1,000  |
 | Mike    | Part Time | 500    |
 | Anna    | Part Time | 500    |
@@ -728,17 +731,17 @@ Here we have a table where the hours table should imply the value of the salary 
 
 Example: Solution
 
-| TA Name | Hours      |
-|---------|----------- |
-| John    | Full Time  |
-| Mike    | Part Time  |
-| Anna    | Part Time  |
-| Lisa    | Full Time  |
+| TA Name | Hours     |
+| ------- | --------- |
+| John    | Full Time |
+| Mike    | Part Time |
+| Anna    | Part Time |
+| Lisa    | Full Time |
 
-| Hours      | Salary |
-|------------|--------|
-| Full Time  | 1,000  |
-| Part Time  | 500    |
+| Hours     | Salary |
+| --------- | ------ |
+| Full Time | 1,000  |
+| Part Time | 500    |
 
 As you can see, we have removed the functional dependency between hours worked and salary by moving hours and salary into their own table, freeing us to reference hours for every TA, and even allowing us to modify salaries independently of hours worked, or make changes, without causing inconsistencies.
 
@@ -888,17 +891,17 @@ Let's assume we decompose `R into X and Y`, We can do so if `X subset of Y impli
 
 Example: Lossless Decomposition - Table A (Constraint: Hours implies Salary)
 
-| TA Name  | Hours     | Office |
-|----------|-----------|--------|
-| John     | Full Time | 401b   |
-| Mike     | Part Time | 205    |
-| Anna     | Part Time | 310    |
-| Lisa     | Full Time | 112    |
+| TA Name | Hours     | Office |
+| ------- | --------- | ------ |
+| John    | Full Time | 401b   |
+| Mike    | Part Time | 205    |
+| Anna    | Part Time | 310    |
+| Lisa    | Full Time | 112    |
 
 Example: Lossless Decomposition - Table B (Constraint: Hours implies Salary)
 
 | Hours     | Salary |
-|-----------|--------|
+| --------- | ------ |
 | Full Time | 1,000  |
 | Part Time | 500    |
 
@@ -1320,7 +1323,7 @@ The traditional method of ingesting data has been to use an extract-transform-lo
 If we compare stream data management systems to database management systems, DBMS assume relatively static datasets, and the other assumes datasets are constantly changing, meaning our query result will keep changinh but the result can be observed so we keep running that query for long periods of time to extract meaning from changing the data.
 
 |         | Database Management | Stream Data Management |
-|---------|---------------------|------------------------|
+| ------- | ------------------- | ---------------------- |
 | Data    | Static              | Dynamic                |
 | Queries | Dynamic             | Static                 |
 
@@ -1334,7 +1337,7 @@ If we compare stream data management systems to database management systems, DBM
 #### Data Types
 
 | Data**base** Management System                    | Data **Stream** Management System   |
-|---------------------------------------------------|-------------------------------------|
+| ------------------------------------------------- | ----------------------------------- |
 | Relation R: **static** (until changed explicitly) | RelationR(t): **varies** overt time |
 |                                                   | **Stream** S: timestamped tuples    |
 
@@ -1478,7 +1481,7 @@ Our assumptions here is that for every timestep we have one new tuple batch pass
 Input Queue --> Operator 1 (Selectivity: Filter 20%) --> Intermediate Result Queue --> Operator 2 --> Output Queue
 
 | Policy     | T=0 | T=1 | T=2 | T=3 | T=4 | T=5 | T=6 |
-|------------|-----|-----|-----|-----|-----|-----|-----|
+| ---------- | --- | --- | --- | --- | --- | --- | --- |
 | **FIFO**   | 1.0 | 1.2 | 2.0 | 2.2 | 3.0 | 3.2 | 4.0 |
 | **Greedy** | 1.0 | 1.2 | 1.4 | 1.6 | 1.8 | 2.0 | 2.2 |
 
@@ -1599,11 +1602,11 @@ INSERT
 
 #### Query Types
 
-|                           |      **Push Query**     |              **Pull Query**             |
-|---------------------------|:-----------------------:|:---------------------------------------:|
-|      **Data Sources**     |      Table, Stream      |                  Table                  |
+|                           |     **Push Query**      |             **Pull Query**              |
+| ------------------------- | :---------------------: | :-------------------------------------: |
+| **Data Sources**          |      Table, Stream      |                  Table                  |
 | **Specific Restrictions** |            -            | Non-windowed aggregation: lookup by key |
-|       **Life Time**       | Keeps returning updates |            Returns one result           |
+| **Life Time**             | Keeps returning updates |           Returns one result            |
 
 ### Streams Summary
 
@@ -1846,7 +1849,33 @@ BASE stands for **B**asically **A**vailable **S**oft State **E**ventually Consis
 * Goal: `scale linearly` when adding new nodes
 * Eventually consistent with `tunable consistency`
 
+### CAP Criticism
 
+The author of CAP theorem has also come out as critical of the theorem itself in later publications. It simplifies a couple of things and these 'choices' are not in reality as strict as suggested by CAP Theorem.
+
+* Focus on an `extreme case`: full partitions are rare
+* `Simplifies tension` between conflicting design goals
+  * Eg: Can decide A vs. C for single transaction
+  * Eg: Consistency is not a binary property, instead a range of consistency levels
+  * ...
+
+### NewSQL
+
+This brings us to a new wave of systems refered to as NewSQL.
+
+* `Traditional SQL`: ACID at the expense of performance
+* `NoSQL`: give up ACID for higher performance
+* `NewSQL`: new ideas for ACID wit high performance
+
+#### H-Store: Observations
+
+* Modern Transaction Workloads
+  * Short running transactions compared to legacy workloads <- Serial Execution for single site Txs prefered
+  * No user input needed, highly automated
+  * Transactions - templates laid out in advance <- Exploit pre-processing and pooling
+* Modern Hardware
+  * Main memory used to be very expensive, now the entire DB can fit in main memory <- Main memory DBMS
+  * Distributed systems are much more common, and prefered more often than not <- Replication for fault tolereance
 
 ## Errata
 
